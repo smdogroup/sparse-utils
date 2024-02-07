@@ -1,6 +1,5 @@
-# include A2D and test headers
 include_directories(${SPARSE_UTILS_ROOT_DIR}/include)
-include_directories(${SPARSE_UTILS_ROOT_DIR}/tests)  # test_commons.h
+include_directories(${SPARSE_UTILS_ROOT_DIR}/tests) # test_commons.h
 
 # Add targets
 add_executable(test_bsr_to_csr_csc test_bsr_to_csr_csc.cpp)
