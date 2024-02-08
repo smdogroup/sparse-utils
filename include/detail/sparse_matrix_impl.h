@@ -7,7 +7,7 @@
 namespace SparseUtils {
 
 // Zero the entries of the sparse matrix
-template <typename T, index_t M, index_t N>
+template <typename T, int M, int N>
 void BSRMat<T, M, N>::zero() {
   std::fill(vals, vals + M * N * nnz, T(0.0));
 }
@@ -17,16 +17,16 @@ void BSRMat<T, M, N>::zero() {
  *
  * @param row block row index
  * @param col block column index
- * @return index_t the value index jp such that vals[jp] gives the
+ * @return int the value index jp such that vals[jp] gives the
  * sought block, if (row, col) isn't in the nonzero pattern, NO_INDEX will be
  * returned
  */
-template <typename T, index_t M, index_t N>
-index_t BSRMat<T, M, N>::find_value_index(index_t row, index_t col) {
-  index_t jp_start = rowp[row];
-  index_t jp_end = rowp[row + 1];
+template <typename T, int M, int N>
+int BSRMat<T, M, N>::find_value_index(int row, int col) {
+  int jp_start = rowp[row];
+  int jp_end = rowp[row + 1];
 
-  for (index_t jp = jp_start; jp < jp_end; jp++) {
+  for (int jp = jp_start; jp < jp_end; jp++) {
     if (cols[jp] == col) {
       return jp;
     }
@@ -45,19 +45,19 @@ index_t BSRMat<T, M, N>::find_value_index(index_t row, index_t col) {
  * @param j global column indices for each entry of mat
  * @param mat the element matrix
  */
-template <typename T, index_t M, index_t N>
+template <typename T, int M, int N>
 template <class Mat>
-void BSRMat<T, M, N>::add_values(const index_t m, const index_t i[],
-                                 const index_t n, const index_t j[], Mat &mat) {
-  for (index_t ii = 0; ii < m; ii++) {
-    index_t block_row = i[ii] / M;
-    index_t local_row = i[ii] % M;
+void BSRMat<T, M, N>::add_values(const int m, const int i[],
+                                 const int n, const int j[], Mat &mat) {
+  for (int ii = 0; ii < m; ii++) {
+    int block_row = i[ii] / M;
+    int local_row = i[ii] % M;
 
-    for (index_t jj = 0; jj < n; jj++) {
-      index_t block_col = j[jj] / N;
-      index_t local_col = j[jj] % N;
+    for (int jj = 0; jj < n; jj++) {
+      int block_col = j[jj] / N;
+      int local_col = j[jj] % N;
 
-      index_t jp = find_value_index(block_row, block_col);
+      int jp = find_value_index(block_row, block_col);
       if (jp != NO_INDEX) {
         vals[M * N * jp + N * local_row + local_col] += mat(ii, jj);
       }
@@ -75,21 +75,21 @@ void BSRMat<T, M, N>::add_values(const index_t m, const index_t i[],
  * @param j column block indices for each block of mat
  * @param mat the element matrix
  */
-template <typename T, index_t M, index_t N>
+template <typename T, int M, int N>
 template <class Mat>
-void BSRMat<T, M, N>::add_block_values(const index_t m, const index_t ib[],
-                                       const index_t n, const index_t jb[],
+void BSRMat<T, M, N>::add_block_values(const int m, const int ib[],
+                                       const int n, const int jb[],
                                        Mat &mat) {
-  for (index_t ii = 0; ii < m; ii++) {
-    index_t block_row = ib[ii];
+  for (int ii = 0; ii < m; ii++) {
+    int block_row = ib[ii];
 
-    for (index_t jj = 0; jj < n; jj++) {
-      index_t block_col = jb[jj];
+    for (int jj = 0; jj < n; jj++) {
+      int block_col = jb[jj];
 
-      index_t jp = find_value_index(block_row, block_col);
+      int jp = find_value_index(block_row, block_col);
       if (jp != NO_INDEX) {
-        for (index_t local_row = 0; local_row < M; local_row++) {
-          for (index_t local_col = 0; local_col < N; local_col++) {
+        for (int local_row = 0; local_row < M; local_row++) {
+          for (int local_col = 0; local_col < N; local_col++) {
             vals[M * N * jp + N * local_row + local_col] +=
                 mat(M * ii + local_row, N * jj + local_col);
           }
@@ -105,14 +105,14 @@ void BSRMat<T, M, N>::add_block_values(const index_t m, const index_t ib[],
  * @param nbcs number of global rows to zero-out
  * @param dof global dof indices
  */
-template <typename T, index_t M, index_t N>
-void BSRMat<T, M, N>::zero_rows(const index_t nbcs, const index_t dof[]) {
-  for (index_t ii = 0; ii < nbcs; ii++) {
-    index_t block_row = dof[ii] / M;
-    index_t local_row = dof[ii] % M;
+template <typename T, int M, int N>
+void BSRMat<T, M, N>::zero_rows(const int nbcs, const int dof[]) {
+  for (int ii = 0; ii < nbcs; ii++) {
+    int block_row = dof[ii] / M;
+    int local_row = dof[ii] % M;
 
-    for (index_t jp = rowp[block_row]; jp < rowp[block_row + 1]; jp++) {
-      for (index_t k = 0; k < N; k++) {
+    for (int jp = rowp[block_row]; jp < rowp[block_row + 1]; jp++) {
+      for (int k = 0; k < N; k++) {
         vals[M * N * jp + N * local_row + k] = 0.0;
       }
 
@@ -130,23 +130,23 @@ void BSRMat<T, M, N>::zero_rows(const index_t nbcs, const index_t dof[]) {
  * @param n_ output, number of columns of the dense matrix
  * @param A_ output, dense matrix values stored in row-major ordering
  */
-template <typename T, index_t M, index_t N>
-void BSRMat<T, M, N>::to_dense(index_t *m_, index_t *n_, T **A_) {
-  index_t m = M * nbrows;
-  index_t n = N * nbcols;
-  index_t size = m * n;
+template <typename T, int M, int N>
+void BSRMat<T, M, N>::to_dense(int *m_, int *n_, T **A_) {
+  int m = M * nbrows;
+  int n = N * nbcols;
+  int size = m * n;
 
   T *A = new T[size];
   std::fill(A, A + size, T(0.0));
 
-  for (index_t i = 0; i < nbrows; i++) {
-    for (index_t jp = rowp[i]; jp < rowp[i + 1]; jp++) {
-      index_t j = cols[jp];
+  for (int i = 0; i < nbrows; i++) {
+    for (int jp = rowp[i]; jp < rowp[i + 1]; jp++) {
+      int j = cols[jp];
 
-      for (index_t ii = 0; ii < M; ii++) {
-        const index_t irow = M * i + ii;
-        for (index_t jj = 0; jj < N; jj++) {
-          const index_t jcol = N * j + jj;
+      for (int ii = 0; ii < M; ii++) {
+        const int irow = M * i + ii;
+        for (int jj = 0; jj < N; jj++) {
+          const int jcol = N * j + jj;
           A[n * irow + jcol] = vals[M * N * jp + N * ii + jj];
         }
       }
@@ -164,7 +164,7 @@ void BSRMat<T, M, N>::to_dense(index_t *m_, index_t *n_, T **A_) {
  * @param mtx_name the output file
  * @param epsilon only write entries such that abs(e) >= epsilon
  */
-template <typename T, index_t M, index_t N>
+template <typename T, int M, int N>
 void BSRMat<T, M, N>::write_mtx(const std::string mtx_name, double epsilon) {
   // Open file and destroy old contents, if any
   std::FILE *fp = std::fopen(mtx_name.c_str(), "w");
@@ -180,16 +180,16 @@ void BSRMat<T, M, N>::write_mtx(const std::string mtx_name, double epsilon) {
   std::fprintf(fp, "%15d%15d%15d\n", nbrows * M, nbcols * N, nnz * M * N);
 
   // Write entries
-  index_t nnz_mtx = 0;
-  for (index_t i = 0; i < nbrows; i++) {
-    for (index_t jp = rowp[i]; jp < rowp[i + 1]; jp++) {
-      index_t j = cols[jp];  // (i, j) is the block index pair
+  int nnz_mtx = 0;
+  for (int i = 0; i < nbrows; i++) {
+    for (int jp = rowp[i]; jp < rowp[i + 1]; jp++) {
+      int j = cols[jp];  // (i, j) is the block index pair
 
-      for (index_t ii = 0; ii < M; ii++) {
-        const index_t irow = M * i + ii + 1;  // convert to 1-based index
-        for (index_t jj = 0; jj < N; jj++) {
+      for (int ii = 0; ii < M; ii++) {
+        const int irow = M * i + ii + 1;  // convert to 1-based index
+        for (int jj = 0; jj < N; jj++) {
           // (irow, jcol) is the entry coo
-          const index_t jcol = N * j + jj + 1;  // convert to 1-based index
+          const int jcol = N * j + jj + 1;  // convert to 1-based index
           T val = vals[M * N * jp + N * ii + jj];
           if constexpr (is_complex<T>::value) {
             std::fprintf(fp, "%d %d %30.20e %30.20e\n", irow, jcol, val.real(),
@@ -225,17 +225,17 @@ void BSRMat<T, M, N>::write_mtx(const std::string mtx_name, double epsilon) {
  * @param A_ output, dense matrix values stored in row-major ordering
  */
 template <typename T>
-void CSRMat<T>::to_dense(index_t *m_, index_t *n_, T **A_) {
-  index_t m = nrows;
-  index_t n = ncols;
-  index_t size = m * n;
+void CSRMat<T>::to_dense(int *m_, int *n_, T **A_) {
+  int m = nrows;
+  int n = ncols;
+  int size = m * n;
 
   T *A = new T[size];
   std::fill(A, A + size, T(0.0));
 
-  for (index_t i = 0; i < nrows; i++) {
-    for (index_t jp = rowp[i]; jp < rowp[i + 1]; jp++) {
-      index_t j = cols[jp];
+  for (int i = 0; i < nrows; i++) {
+    for (int jp = rowp[i]; jp < rowp[i + 1]; jp++) {
+      int j = cols[jp];
       A[n * i + j] = vals[jp];
     }
   }
@@ -267,9 +267,9 @@ void CSRMat<T>::write_mtx(const std::string mtx_name, double epsilon) {
   std::fprintf(fp, "%15d%15d%15d\n", nrows, ncols, nnz);
 
   // Write entries
-  index_t nnz_mtx = 0;
-  for (index_t i = 0; i < nrows; i++) {
-    for (index_t jp = rowp[i]; jp < rowp[i + 1]; jp++) {
+  int nnz_mtx = 0;
+  for (int i = 0; i < nrows; i++) {
+    for (int jp = rowp[i]; jp < rowp[i + 1]; jp++) {
       if constexpr (is_complex<T>::value) {
         std::fprintf(fp, "%d %d %30.20e %30.20e\n", i + 1, cols[jp] + 1,
                      vals[jp].real(), vals[jp].imag());
@@ -302,11 +302,11 @@ void CSRMat<T>::write_mtx(const std::string mtx_name, double epsilon) {
  * @param dof global dof indices
  */
 template <typename T>
-void CSCMat<T>::zero_columns(const index_t nbcs, const index_t dof[]) {
-  for (index_t ii = 0; ii < nbcs; ii++) {
-    index_t column = dof[ii];
+void CSCMat<T>::zero_columns(const int nbcs, const int dof[]) {
+  for (int ii = 0; ii < nbcs; ii++) {
+    int column = dof[ii];
 
-    for (index_t jp = colp[column]; jp < colp[column + 1]; jp++) {
+    for (int jp = colp[column]; jp < colp[column + 1]; jp++) {
       vals[jp] = 0.0;
 
       if (rows[jp] == column) {
@@ -324,17 +324,17 @@ void CSCMat<T>::zero_columns(const index_t nbcs, const index_t dof[]) {
  * @param A_ output, dense matrix values stored in row-major ordering
  */
 template <typename T>
-void CSCMat<T>::to_dense(index_t *m_, index_t *n_, T **A_) {
-  index_t m = nrows;
-  index_t n = ncols;
-  index_t size = m * n;
+void CSCMat<T>::to_dense(int *m_, int *n_, T **A_) {
+  int m = nrows;
+  int n = ncols;
+  int size = m * n;
 
   T *A = new T[size];
   std::fill(A, A + size, T(0.0));
 
-  for (index_t j = 0; j < ncols; j++) {
-    for (index_t ip = colp[j]; ip < colp[j + 1]; ip++) {
-      index_t i = rows[ip];
+  for (int j = 0; j < ncols; j++) {
+    for (int ip = colp[j]; ip < colp[j + 1]; ip++) {
+      int i = rows[ip];
       A[n * i + j] = vals[ip];
     }
   }
@@ -366,9 +366,9 @@ void CSCMat<T>::write_mtx(const std::string mtx_name, double epsilon) {
   std::fprintf(fp, "%15d%15d%15d\n", nrows, ncols, nnz);
 
   // Write entries
-  index_t nnz_mtx = 0;
-  for (index_t j = 0; j < ncols; j++) {
-    for (index_t ip = colp[j]; ip < colp[j + 1]; ip++) {
+  int nnz_mtx = 0;
+  for (int j = 0; j < ncols; j++) {
+    for (int ip = colp[j]; ip < colp[j + 1]; ip++) {
       if constexpr (is_complex<T>::value) {
         std::fprintf(fp, "%d %d %30.20e %30.20e\n", rows[ip] + 1, j + 1,
                      vals[ip].real(), vals[ip].imag());

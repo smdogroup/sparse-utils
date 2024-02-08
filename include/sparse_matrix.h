@@ -36,7 +36,7 @@ namespace SparseUtils {
  * Note: blocks are stored row-by-row.
  *
  */
-template <typename T, index_t M, index_t N>
+template <typename T, int M, int N>
 class BSRMat {
  public:
   /**
@@ -50,18 +50,18 @@ class BSRMat {
    * @param cols_ vector of column indices
    */
   template <class VecType>
-  BSRMat(index_t nbrows, index_t nbcols, index_t nnz, const VecType &rowp_,
+  BSRMat(int nbrows, int nbcols, int nnz, const VecType &rowp_,
          const VecType &cols_)
       : nbrows(nbrows), nbcols(nbcols), nnz(nnz) {
-    rowp = new index_t[nbrows + 1];
-    cols = new index_t[nnz];
+    rowp = new int[nbrows + 1];
+    cols = new int[nnz];
     vals = new T[M * N * nnz];
 
-    for (index_t i = 0; i < nbrows + 1; i++) {
+    for (int i = 0; i < nbrows + 1; i++) {
       rowp[i] = rowp_[i];
     }
 
-    for (index_t i = 0; i < nnz; i++) {
+    for (int i = 0; i < nnz; i++) {
       cols[i] = cols_[i];
     }
   }
@@ -80,50 +80,50 @@ class BSRMat {
   void zero();
 
   // Find the value index of a block given indices (row, col) of a block
-  index_t find_value_index(index_t row, index_t col);
+  int find_value_index(int row, int col);
 
   // add values from an element matrix mat of shape (m, n)
   template <class Mat>
-  void add_values(const index_t m, const index_t i[], const index_t n,
-                  const index_t j[], Mat &mat);
+  void add_values(const int m, const int i[], const int n,
+                  const int j[], Mat &mat);
 
   template <class Mat>
-  void add_block_values(const index_t m, const index_t i[], const index_t n,
-                        const index_t j[], Mat &mat);
+  void add_block_values(const int m, const int i[], const int n,
+                        const int j[], Mat &mat);
 
   // Zero out rows and set diagonal entry to one for each zeroed row
-  void zero_rows(const index_t nbcs, const index_t dof[]);
+  void zero_rows(const int nbcs, const int dof[]);
 
   // Convert to a dense matrix
-  void to_dense(index_t *m_, index_t *n_, T **A_);
+  void to_dense(int *m_, int *n_, T **A_);
 
   // Export the matrix as mtx format
   void write_mtx(const std::string mtx_name = "matrix.mtx",
                  double epsilon = 0.0);
 
   // Number of block rows, block columns and non-zero blocks, nnz = rowp[nbrows]
-  index_t nbrows = 0, nbcols = 0, nnz = 0;
+  int nbrows = 0, nbcols = 0, nnz = 0;
 
   // rowp and cols array
-  index_t *rowp = nullptr;  // length: nbrows + 1
-  index_t *cols = nullptr;  // length: nnz = rowp[nbrows]
+  int *rowp = nullptr;  // length: nbrows + 1
+  int *cols = nullptr;  // length: nnz = rowp[nbrows]
   T *vals = nullptr;
 
   // Pointer to the diagonal block, this is not allocated until
   // factorization
-  index_t *diag = nullptr;  // length: nbrows
+  int *diag = nullptr;  // length: nbrows
 
   // row-permutation perm[new row] = old row
   // This is not allocated by default
-  index_t *perm = nullptr;
+  int *perm = nullptr;
 
   // Inverse row-permutation iperm[old row] = new row
   // This is not allocated by default
-  index_t *iperm = nullptr;
+  int *iperm = nullptr;
 
   // When coloring is used, its ordering is stored in the permutation array
-  index_t num_colors = 0;          // Number of colors
-  index_t *color_count = nullptr;  // Number of nodes with this color, not
+  int num_colors = 0;          // Number of colors
+  int *color_count = nullptr;  // Number of nodes with this color, not
                                    // allocated by default
 };
 
@@ -131,18 +131,18 @@ class BSRMat {
 template <typename T>
 class CSRMat {
  public:
-  CSRMat(index_t nrows, index_t ncols, index_t nnz,
-         const index_t *rowp_ = nullptr, const index_t *cols_ = nullptr)
+  CSRMat(int nrows, int ncols, int nnz,
+         const int *rowp_ = nullptr, const int *cols_ = nullptr)
       : nrows(nrows), ncols(ncols), nnz(nnz) {
-    rowp = new index_t[nrows + 1];
-    cols = new index_t[nnz];
+    rowp = new int[nrows + 1];
+    cols = new int[nnz];
     vals = new T[nnz];
 
     if (rowp_ && cols_) {
-      for (index_t i = 0; i < nrows + 1; i++) {
+      for (int i = 0; i < nrows + 1; i++) {
         rowp[i] = rowp_[i];
       }
-      for (index_t i = 0; i < nnz; i++) {
+      for (int i = 0; i < nnz; i++) {
         cols[i] = cols_[i];
       }
     }
@@ -155,15 +155,15 @@ class CSRMat {
   }
 
   // Convert to a dense matrix
-  void to_dense(index_t *m_, index_t *n_, T **A_);
+  void to_dense(int *m_, int *n_, T **A_);
 
   // Export the matrix as mtx format
   void write_mtx(const std::string mtx_name = "matrix.mtx",
                  double epsilon = 0.0);
 
-  index_t nrows, ncols, nnz;  // number of rows, columns and nonzeros
-  index_t *rowp;              // length: nrows + 1
-  index_t *cols;              // length: nnz
+  int nrows, ncols, nnz;  // number of rows, columns and nonzeros
+  int *rowp;              // length: nrows + 1
+  int *cols;              // length: nnz
   T *vals;                    // length: nnz
 };
 
@@ -173,18 +173,18 @@ class CSRMat {
 template <typename T>
 class CSCMat {
  public:
-  CSCMat(index_t nrows, index_t ncols, index_t nnz,
-         const index_t *colp_ = nullptr, const index_t *rows_ = nullptr)
+  CSCMat(int nrows, int ncols, int nnz,
+         const int *colp_ = nullptr, const int *rows_ = nullptr)
       : nrows(nrows), ncols(ncols), nnz(nnz) {
-    colp = new index_t[ncols + 1];
-    rows = new index_t[nnz];
+    colp = new int[ncols + 1];
+    rows = new int[nnz];
     vals = new T[nnz];
 
     if (colp_ && rows_) {
-      for (index_t i = 0; i < ncols + 1; i++) {
+      for (int i = 0; i < ncols + 1; i++) {
         colp[i] = colp_[i];
       }
-      for (index_t i = 0; i < nnz; i++) {
+      for (int i = 0; i < nnz; i++) {
         rows[i] = rows_[i];
       }
     }
@@ -197,19 +197,19 @@ class CSCMat {
   }
 
   // Zero out columns and set diagonal entry to one for each zeroed column
-  void zero_columns(const index_t nbcs, const index_t dof[]);
+  void zero_columns(const int nbcs, const int dof[]);
 
   // Convert to a dense matrix
-  void to_dense(index_t *m_, index_t *n_, T **A_);
+  void to_dense(int *m_, int *n_, T **A_);
 
   // Export the matrix as mtx format
   void write_mtx(const std::string mtx_name = "matrix.mtx",
                  double epsilon = 0.0);
 
-  index_t nrows = 0, ncols = 0,
+  int nrows = 0, ncols = 0,
           nnz = 0;          // number of rows, columns and nonzeros
-  index_t *colp = nullptr;  // length: ncols + 1
-  index_t *rows = nullptr;  // length: nnz
+  int *colp = nullptr;  // length: ncols + 1
+  int *rows = nullptr;  // length: nnz
   T *vals = nullptr;        // length: nnz
 };
 

@@ -9,18 +9,18 @@
 
 namespace SparseUtils {
 
-template <index_t n, class VecType>
+template <int n, class VecType>
 void print_vec(const VecType& vec) {
-  for (index_t j = 0; j < n; j++) {
+  for (int j = 0; j < n; j++) {
     std::cout << std::setw(5) << vec[j];
   }
   std::cout << std::endl;
 }
 
-template <index_t m, index_t n, class MatType>
+template <int m, int n, class MatType>
 void print_mat(const MatType& mat) {
-  for (index_t i = 0; i < m; i++) {
-    for (index_t j = 0; j < n; j++) {
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
       std::cout << std::setw(15) << mat(i, j);
     }
     std::cout << std::endl;
@@ -34,25 +34,25 @@ void print_mat(const MatType& mat) {
   EXPECT_NEAR(val1, val2, abs_err)
 
 #define _EXPECT_VEC_NEAR(m, vec, vals)   \
-  for (index_t i = 0; i < m; i++) {      \
+  for (int i = 0; i < m; i++) {      \
     EXPECT_NEAR(vec(i), vals[i], 1e-15); \
   }
 
 #define _EXPECT_VEC_NEAR_TOL(m, vec, vals, abs_err) \
-  for (index_t i = 0; i < m; i++) {                 \
+  for (int i = 0; i < m; i++) {                 \
     EXPECT_NEAR(vec(i), vals[i], abs_err);          \
   }
 
 #define _EXPECT_MAT_NEAR(m, n, mat, vals)             \
-  for (index_t i = 0; i < m; i++) {                   \
-    for (index_t j = 0; j < n; j++) {                 \
+  for (int i = 0; i < m; i++) {                   \
+    for (int j = 0; j < n; j++) {                 \
       EXPECT_NEAR(mat(i, j), vals[n * i + j], 1e-15); \
     }                                                 \
   }
 
 #define _EXPECT_MAT_NEAR_TOL(m, n, mat, vals, abs_err)  \
-  for (index_t i = 0; i < m; i++) {                     \
-    for (index_t j = 0; j < n; j++) {                   \
+  for (int i = 0; i < m; i++) {                     \
+    for (int j = 0; j < n; j++) {                   \
       EXPECT_NEAR(mat(i, j), vals[n * i + j], abs_err); \
     }                                                   \
   }
@@ -85,7 +85,7 @@ void print_mat(const MatType& mat) {
 // Usage:
 // - EXPECT_VEC_EQ(m, vec, vals)
 #define EXPECT_VEC_EQ(m, vec, vals) \
-  for (index_t i = 0; i < m; i++) { \
+  for (int i = 0; i < m; i++) { \
     EXPECT_EQ(vec[i], vals[i]);     \
   }
 }  // namespace SparseUtils
