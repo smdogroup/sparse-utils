@@ -1,5 +1,5 @@
-#ifndef CONNECTIVITY_TOOLS_H
-#define CONNECTIVITY_TOOLS_H
+#ifndef SPARSE_UTILS_CONNECTIVITY_TOOLS_H
+#define SPARSE_UTILS_CONNECTIVITY_TOOLS_H
 
 void NodeToElementFromConnectivity(int num_nodes, int num_elements,
                                    const int nodes_per_element,
@@ -110,4 +110,4 @@ int CSRFromConnectivity(int num_nodes, int num_elements,
   delete[] counter;
 }
 
-#endif  // CONNECTIVITY_TOOLS_H
+#endif  // SPARSE_UTILS_CONNECTIVITY_TOOLS_H

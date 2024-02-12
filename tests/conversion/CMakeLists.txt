@@ -1,8 +1,9 @@
-include_directories(${SPARSE_UTILS_ROOT_DIR}/include)
-include_directories(${SPARSE_UTILS_ROOT_DIR}/tests) # test_commons.h
-
 # Add targets
 add_executable(test_bsr_to_csr_csc test_bsr_to_csr_csc.cpp)
+
+target_include_directories(
+    test_bsr_to_csr_csc
+    PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/tests/include)
 
 # Link to the default main from Google Test
 target_link_libraries(test_bsr_to_csr_csc gtest_main)
