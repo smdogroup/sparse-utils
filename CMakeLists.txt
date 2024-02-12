@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Set project name, language and c++ std
-project("SPARSE_UTILS"
+project("SparseUtils"
   VERSION 1.0.0
   DESCRIPTION "A collection of sparse matrix data types and sparse solvers."
   HOMEPAGE_URL "https://github.com/smdogroup/sparse-utils"
@@ -10,16 +10,31 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Dependencies
-if(NOT DEFINED SPARSE_UTILS_METIS_DIR OR NOT EXISTS ${SPARSE_UTILS_METIS_DIR})
-  message(FATAL_ERROR "please specify the path to a metis installation by using
+if(NOT DEFINED SPARSE_UTILS_METIS_DIR)
+  set(SPARSE_UTILS_METIS_DIR $ENV{HOME}/installs/metis)
+endif()
+
+if(NOT EXISTS ${SPARSE_UTILS_METIS_DIR})
+  message(FATAL_ERROR "${SPARSE_UTILS_METIS_DIR} does not exist, please specify\
+  the path to a working metis installation by using\
   -DSPARSE_UTILS_METIS_DIR=...")
 endif()
+
+# Change the default value of CMAKE_INSTALL_PREFIX
+set(SPARSE_UTILS_INSTALL_DIR $ENV{HOME}/installs/sparse-utils)
+
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX ${SPARSE_UTILS_INSTALL_DIR} CACHE PATH "The default\
+  path to install SparseUitls to" FORCE)
+  message("The directory to install SparseUtils is set to default:\
+   ${SPARSE_UTILS_INSTALL_DIR}")
+endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 # Some path variables
 include(GNUInstallDirs)
 
-option(SPARSE_UTILS_BUILD_TESTS "Build unit tests" ${PROJECT_IS_TOP_LEVEL})
-option(SPARSE_UTILS_INSTALL_LIBRARY "Enable installation" ${PROJECT_IS_TOP_LEVEL})
+option(SPARSE_UTILS_BUILD_TESTS " Build unit tests " OFF)
+option(SPARSE_UTILS_INSTALL_LIBRARY " Enable installation " ${PROJECT_IS_TOP_LEVEL})
 
 find_package(LAPACK REQUIRED)
 
@@ -86,9 +101,9 @@ if(SPARSE_UTILS_INSTALL_LIBRARY)
   install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 endif()
 
-# # Build unit tests
-# # Download google test (git tag needs to be updated frequently)
-# if(SPARSE_UTILS_BUILD_TESTS)
-# add_subdirectory(tests)
-# enable_testing()
-# endif()
+# Build unit tests
+# Download google test (git tag needs to be updated frequently)
+if(SPARSE_UTILS_BUILD_TESTS)
+  add_subdirectory(tests)
+  enable_testing()
+endif()

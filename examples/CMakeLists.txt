@@ -8,7 +8,7 @@ if(NOT SPARSE_UTILS_INSTALL_DIR OR NOT EXISTS ${SPARSE_UTILS_INSTALL_DIR})
     )
 endif()
 
-find_package(SPARSE_UTILS REQUIRED PATHS ${SPARSE_UTILS_INSTALL_DIR})
+find_package(SparseUtils REQUIRED PATHS ${SPARSE_UTILS_INSTALL_DIR})
 
 add_subdirectory(bsr)
 add_subdirectory(cholesky)
