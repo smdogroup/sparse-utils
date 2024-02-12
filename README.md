@@ -27,7 +27,7 @@ Not yet supported.
 ### Raw Makefile
 Not yet supported.
 
-### Use
+## Use
 
 Using SparseUtils is simple with CMake. For the application project, add
 ```
