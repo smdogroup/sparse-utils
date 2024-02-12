@@ -1,3 +1,4 @@
+# Download google test (git tag needs to be updated frequently)
 include(FetchContent)
 FetchContent_Declare(
     googletest

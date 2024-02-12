@@ -27,10 +27,25 @@ Not yet supported.
 ### Raw Makefile
 Not yet supported.
 
+### Use
+
+Using SparseUtils is simple with CMake. For the application project, add
+```
+find_package(SparseUtils REQUIRED PATHS <path-to-sparse-utils-installation>)
+```
+to ```CMakeLists.txt```, and use
+```
+target_link_libraries(<app-target> SparseUtils::SparseUtils)
+```
+in the ```CMakeLists.txt``` for the application executables. See
+[examples/CMakeLists.txt](examples/CMakeLists.txt) for example.
+
+
+
 ## Test
 To build and execute unit tests, using the following command:
 ```
-mkdir build && cd build && cmake .. -SPARSE_UTILS_BUILD_TESTS=ON && make -j && ctest .
+mkdir build && cd build && cmake .. -DSPARSE_UTILS_BUILD_TESTS=ON && make -j && ctest .
 ```
 
 ## CMake variables

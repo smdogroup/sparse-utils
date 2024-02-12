@@ -102,8 +102,7 @@ if(SPARSE_UTILS_INSTALL_LIBRARY)
 endif()
 
 # Build unit tests
-# Download google test (git tag needs to be updated frequently)
 if(SPARSE_UTILS_BUILD_TESTS)
-  add_subdirectory(tests)
   enable_testing()
+  add_subdirectory(tests)
 endif()
