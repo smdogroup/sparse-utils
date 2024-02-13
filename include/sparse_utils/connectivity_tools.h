@@ -1,6 +1,8 @@
 #ifndef SPARSE_UTILS_CONNECTIVITY_TOOLS_H
 #define SPARSE_UTILS_CONNECTIVITY_TOOLS_H
 
+namespace SparseUtils {
+
 void NodeToElementFromConnectivity(int num_nodes, int num_elements,
                                    const int nodes_per_element,
                                    const int* element_nodes,
@@ -44,9 +46,9 @@ void NodeToElementFromConnectivity(int num_nodes, int num_elements,
   *node_to_elem_ = node_to_elem;
 }
 
-int CSRFromConnectivity(int num_nodes, int num_elements,
-                        const int nodes_per_element, const int* element_nodes,
-                        int** rowp_, int** cols_) {
+void CSRFromConnectivity(int num_nodes, int num_elements,
+                         const int nodes_per_element, const int* element_nodes,
+                         int** rowp_, int** cols_) {
   int* node_to_elem_ptr = nullptr;
   int* node_to_elem = nullptr;
   NodeToElementFromConnectivity(num_nodes, num_elements, nodes_per_element,
@@ -109,5 +111,7 @@ int CSRFromConnectivity(int num_nodes, int num_elements,
   delete[] node_to_elem;
   delete[] counter;
 }
+
+}  // namespace SparseUtils
 
 #endif  // SPARSE_UTILS_CONNECTIVITY_TOOLS_H

@@ -282,7 +282,7 @@ int blockInverse(AType& A, AinvType& Ainv, IType& ipiv) {
     T maxv = A(k, k);
     for (int j = k + 1; j < N; j++) {
       T t = A(j, k);
-      if (absfunc(t) > absfunc(maxv)) {
+      if (absreal(t) > absreal(maxv)) {
         maxv = t;
         r = j;
       }
@@ -299,7 +299,7 @@ int blockInverse(AType& A, AinvType& Ainv, IType& ipiv) {
       }
     }
 
-    if (absfunc(A(k, k)) == 0.0) {
+    if (absreal(A(k, k)) == 0.0) {
       fail = k + 1;
       return fail;
     }

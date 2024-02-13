@@ -791,7 +791,7 @@ T BSRMatGershgorinSpectralEstimate(BSRMat<T, M, M> &A) {
 
       for (index_t jp = A.rowp[i]; jp < A.rowp[i + 1]; jp++) {
         for (index_t j = 0; j < M; j++) {
-          R += absfunc(A.vals(jp, k, j));
+          R += absreal(A.vals(jp, k, j));
         }
 
         if (A.cols[jp] == i) {
@@ -799,9 +799,9 @@ T BSRMatGershgorinSpectralEstimate(BSRMat<T, M, M> &A) {
         }
       }
 
-      T rho0 = a + (R - absfunc(a));
+      T rho0 = a + (R - absreal(a));
 
-      if (absfunc(rho0) > absfunc(rho)) {
+      if (absreal(rho0) > absreal(rho)) {
         rho = rho0;
       }
     }
@@ -890,7 +890,7 @@ T BSRMatArnoldiSpectralRadius(BSRMat<T, M, M> &A, index_t size = 15) {
   T rho = 0.0;
   for (int i = 0; i < size; i++) {
     double val = sqrt(eigreal[i] * eigreal[i] + eigimag[i] * eigimag[i]);
-    if (val > absfunc(rho)) {
+    if (val > absreal(rho)) {
       rho = val;
     }
   }

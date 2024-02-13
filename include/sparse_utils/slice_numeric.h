@@ -305,7 +305,7 @@ int blockInverseSlice(AType& A, const int Ai, AinvType& Ainv, IType& ipiv) {
     T maxv = A(Ai, k, k);
     for (int j = k + 1; j < N; j++) {
       T t = A(Ai, j, k);
-      if (absfunc(t) > absfunc(maxv)) {
+      if (absreal(t) > absreal(maxv)) {
         maxv = t;
         r = j;
       }
@@ -322,7 +322,7 @@ int blockInverseSlice(AType& A, const int Ai, AinvType& Ainv, IType& ipiv) {
       }
     }
 
-    if (absfunc(A(Ai, k, k)) == 0.0) {
+    if (absreal(A(Ai, k, k)) == 0.0) {
       fail = k + 1;
       return fail;
     }

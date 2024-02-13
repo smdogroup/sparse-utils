@@ -43,12 +43,11 @@ int BSRMat<T, M, N>::find_value_index(int row, int col) {
  * @param i global row indices for each entry of mat
  * @param n number of columns of mat
  * @param j global column indices for each entry of mat
- * @param mat the element matrix
+ * @param mat the flattened element matrix, entries stored row by row
  */
 template <typename T, int M, int N>
-template <class Mat>
-void BSRMat<T, M, N>::add_values(const int m, const int i[],
-                                 const int n, const int j[], Mat &mat) {
+void BSRMat<T, M, N>::add_values(const int m, const int i[], const int n,
+                                 const int j[], T mat[]) {
   for (int ii = 0; ii < m; ii++) {
     int block_row = i[ii] / M;
     int local_row = i[ii] % M;
@@ -59,7 +58,7 @@ void BSRMat<T, M, N>::add_values(const int m, const int i[],
 
       int jp = find_value_index(block_row, block_col);
       if (jp != NO_INDEX) {
-        vals[M * N * jp + N * local_row + local_col] += mat(ii, jj);
+        vals[M * N * jp + N * local_row + local_col] += mat[ii * n + jj];
       }
     }
   }
@@ -72,14 +71,12 @@ void BSRMat<T, M, N>::add_values(const int m, const int i[],
  * @param m number of row blocks of mat
  * @param ib row block indices for each block of mat
  * @param n number of column blocks of mat
- * @param j column block indices for each block of mat
- * @param mat the element matrix
+ * @param jb column block indices for each block of mat
+ * @param mat the flattened element matrix, entries stored row by row
  */
 template <typename T, int M, int N>
-template <class Mat>
-void BSRMat<T, M, N>::add_block_values(const int m, const int ib[],
-                                       const int n, const int jb[],
-                                       Mat &mat) {
+void BSRMat<T, M, N>::add_block_values(const int m, const int ib[], const int n,
+                                       const int jb[], T mat[]) {
   for (int ii = 0; ii < m; ii++) {
     int block_row = ib[ii];
 
@@ -91,7 +88,7 @@ void BSRMat<T, M, N>::add_block_values(const int m, const int ib[],
         for (int local_row = 0; local_row < M; local_row++) {
           for (int local_col = 0; local_col < N; local_col++) {
             vals[M * N * jp + N * local_row + local_col] +=
-                mat(M * ii + local_row, N * jj + local_col);
+                mat[(M * ii + local_row) * n * N + N * jj + local_col];
           }
         }
       }
@@ -195,7 +192,7 @@ void BSRMat<T, M, N>::write_mtx(const std::string mtx_name, double epsilon) {
             std::fprintf(fp, "%d %d %30.20e %30.20e\n", irow, jcol, val.real(),
                          val.imag());
             nnz_mtx++;
-          } else if (absfunc(val) >= epsilon) {
+          } else if (absreal(val) >= epsilon) {
             std::fprintf(fp, "%d %d %30.20e\n", irow, jcol, val);
             nnz_mtx++;
           }
@@ -274,7 +271,7 @@ void CSRMat<T>::write_mtx(const std::string mtx_name, double epsilon) {
         std::fprintf(fp, "%d %d %30.20e %30.20e\n", i + 1, cols[jp] + 1,
                      vals[jp].real(), vals[jp].imag());
         nnz_mtx++;
-      } else if (absfunc(vals[jp]) >= epsilon) {
+      } else if (absreal(vals[jp]) >= epsilon) {
         std::fprintf(fp, "%d %d %30.20e\n", i + 1, cols[jp] + 1, vals[jp]);
         nnz_mtx++;
       }
@@ -373,7 +370,7 @@ void CSCMat<T>::write_mtx(const std::string mtx_name, double epsilon) {
         std::fprintf(fp, "%d %d %30.20e %30.20e\n", rows[ip] + 1, j + 1,
                      vals[ip].real(), vals[ip].imag());
         nnz_mtx++;
-      } else if (absfunc(vals[ip]) >= epsilon) {
+      } else if (absreal(vals[ip]) >= epsilon) {
         std::fprintf(fp, "%d %d %30.20e\n", rows[ip] + 1, j + 1, vals[ip]);
         nnz_mtx++;
       }

@@ -83,13 +83,10 @@ class BSRMat {
   int find_value_index(int row, int col);
 
   // add values from an element matrix mat of shape (m, n)
-  template <class Mat>
-  void add_values(const int m, const int i[], const int n,
-                  const int j[], Mat &mat);
-
-  template <class Mat>
-  void add_block_values(const int m, const int i[], const int n,
-                        const int j[], Mat &mat);
+  void add_values(const int m, const int i[], const int n, const int j[],
+                  T mat[]);
+  void add_block_values(const int m, const int i[], const int n, const int j[],
+                        T mat[]);
 
   // Zero out rows and set diagonal entry to one for each zeroed row
   void zero_rows(const int nbcs, const int dof[]);
@@ -124,15 +121,15 @@ class BSRMat {
   // When coloring is used, its ordering is stored in the permutation array
   int num_colors = 0;          // Number of colors
   int *color_count = nullptr;  // Number of nodes with this color, not
-                                   // allocated by default
+                               // allocated by default
 };
 
 // Compressed sparse row matrix
 template <typename T>
 class CSRMat {
  public:
-  CSRMat(int nrows, int ncols, int nnz,
-         const int *rowp_ = nullptr, const int *cols_ = nullptr)
+  CSRMat(int nrows, int ncols, int nnz, const int *rowp_ = nullptr,
+         const int *cols_ = nullptr)
       : nrows(nrows), ncols(ncols), nnz(nnz) {
     rowp = new int[nrows + 1];
     cols = new int[nnz];
@@ -164,7 +161,7 @@ class CSRMat {
   int nrows, ncols, nnz;  // number of rows, columns and nonzeros
   int *rowp;              // length: nrows + 1
   int *cols;              // length: nnz
-  T *vals;                    // length: nnz
+  T *vals;                // length: nnz
 };
 
 /**
@@ -173,8 +170,8 @@ class CSRMat {
 template <typename T>
 class CSCMat {
  public:
-  CSCMat(int nrows, int ncols, int nnz,
-         const int *colp_ = nullptr, const int *rows_ = nullptr)
+  CSCMat(int nrows, int ncols, int nnz, const int *colp_ = nullptr,
+         const int *rows_ = nullptr)
       : nrows(nrows), ncols(ncols), nnz(nnz) {
     colp = new int[ncols + 1];
     rows = new int[nnz];
@@ -207,10 +204,10 @@ class CSCMat {
                  double epsilon = 0.0);
 
   int nrows = 0, ncols = 0,
-          nnz = 0;          // number of rows, columns and nonzeros
+      nnz = 0;          // number of rows, columns and nonzeros
   int *colp = nullptr;  // length: ncols + 1
   int *rows = nullptr;  // length: nnz
-  T *vals = nullptr;        // length: nnz
+  T *vals = nullptr;    // length: nnz
 };
 
 }  // namespace SparseUtils

@@ -34,6 +34,23 @@ struct is_complex : public std::false_type {};
 template <typename T>
 struct is_complex<complex_t<T>> : public std::true_type {};
 
+// Get absolute value of the real part
+inline double absreal(complex_t<double> a) {
+  if (a.real() >= 0.0) {
+    return a.real();
+  } else {
+    return -a.real();
+  }
+}
+
+inline double absreal(double a) {
+  if (a >= 0.0) {
+    return a;
+  } else {
+    return -a;
+  }
+}
+
 }  // namespace SparseUtils
 
 #endif  // SPARSE_UTILS_DEFS_H
