@@ -1,7 +1,7 @@
 #ifndef SPARSE_UTILS_SPARSE_CHOLESKY_IMPL_H
 #define SPARSE_UTILS_SPARSE_CHOLESKY_IMPL_H
 
-#include "sparse_cholesky.h"
+#include "sparse_utils/sparse_cholesky.h"
 
 namespace SparseUtils {
 

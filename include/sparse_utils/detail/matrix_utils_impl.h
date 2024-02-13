@@ -1,7 +1,7 @@
 #ifndef SPRASE_UTILS_UTILS_IMPL_H
 #define SPRASE_UTILS_UTILS_IMPL_H
 
-#include "matrix_utils.h"
+#include "sparse_utils/matrix_utils.h"
 
 namespace SparseUtils {
 

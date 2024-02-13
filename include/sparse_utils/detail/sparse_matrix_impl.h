@@ -2,7 +2,7 @@
 #ifndef SPARSE_UTILS_SPARSE_MATRIX_IMPL_H
 #define SPARSE_UTILS_SPARSE_MATRIX_IMPL_H
 
-#include "sparse_matrix.h"
+#include "sparse_utils/sparse_matrix.h"
 
 namespace SparseUtils {
 

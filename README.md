@@ -63,4 +63,5 @@ cmake ... -DVARIABLE=VAL ...
 |----------|-------------|---------|---------|
 |SPARSE_UTILS_METIS_DIR|path to metis installation|```${HOME}/installs/metis```|a path|
 |CMAKE_INSTALL_PREFIX|the path to install SparseUtils to|```${HOME}/installs/sparse-utils```|a path|
-|SPARSE_UTILS_BUILD_TESTS|build unit tests or not|OFF|ON, OFF|
+|SPARSE_UTILS_BUILD_TESTS|build unit tests or not|```OFF```|```ON```, ```OFF```|
+|CMAKE_BUILD_TYPE|build type|N/A|```Release```, ```Debug```|

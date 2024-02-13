@@ -203,6 +203,6 @@ class SparseCholesky {
 
 }  // namespace SparseUtils
 
-#include "detail/sparse_cholesky_impl.h"
+#include "sparse_utils/detail/sparse_cholesky_impl.h"
 
 #endif  // SPARSE_UTILS_SPARSE_CHOLESKY_H
