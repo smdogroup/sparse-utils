@@ -1,15 +1,14 @@
 #ifndef SPRASE_UTILS_UTILS_IMPL_H
 #define SPRASE_UTILS_UTILS_IMPL_H
 
-#include "utils.h"
+#include "matrix_utils.h"
 
 namespace SparseUtils {
 
 // Compute y = alpha A * x + beta * y
 template <typename T>
-void CSRMatVec(double alpha, int nrows, const int *rowp,
-               const int *cols, const T *Avals, const T *x, double beta,
-               T *y) {
+void CSRMatVec(double alpha, int nrows, const int *rowp, const int *cols,
+               const T *Avals, const T *x, double beta, T *y) {
   if (alpha == 1.0 && beta == 0.0) {
     for (int i = 0; i < nrows; i++) {
       int jp_end = rowp[i + 1];
@@ -58,8 +57,7 @@ void CSRMatVec(double alpha, int nrows, const int *rowp,
 // Compute y = alpha A * x + beta * y
 template <typename T>
 void CSCMatVec(double alpha, int nrows, int ncols, const int *colp,
-               const int *rows, const T *Avals, const T *x, double beta,
-               T *y) {
+               const int *rows, const T *Avals, const T *x, double beta, T *y) {
   if (beta == 0.0) {
     for (int i = 0; i < nrows; i++) {
       y[i] = 0.0;
@@ -101,9 +99,8 @@ void CSCMatVec(double alpha, int nrows, int ncols, const int *colp,
 }
 
 template <typename T>
-void SparseTranspose(int nrows, int ncols, const int *rowp,
-                     const int *cols, const T *Avals, int *colp,
-                     int *rows, T *ATvals) {
+void SparseTranspose(int nrows, int ncols, const int *rowp, const int *cols,
+                     const T *Avals, int *colp, int *rows, T *ATvals) {
   for (int j = 0; j < ncols + 1; j++) {
     colp[j] = 0;
   }
@@ -143,11 +140,10 @@ void SparseTranspose(int nrows, int ncols, const int *rowp,
 
 // Compute the number of entries in the matrix product A * A^{T}
 template <typename T>
-void MatMatTransNumeric(int nrows, int ncols, const int *rowp,
-                        const int *cols, const T *Avals,
-                        const int *colp, const int *rows,
-                        const T *ATvals, const int *Bcolp, int *Brows,
-                        T *Bvals, int *flag, T *tmp) {
+void MatMatTransNumeric(int nrows, int ncols, const int *rowp, const int *cols,
+                        const T *Avals, const int *colp, const int *rows,
+                        const T *ATvals, const int *Bcolp, int *Brows, T *Bvals,
+                        int *flag, T *tmp) {
   for (int i = 0; i < nrows; i++) {
     flag[i] = -1;
   }
@@ -187,12 +183,11 @@ void MatMatTransNumeric(int nrows, int ncols, const int *rowp,
 
 // Compute the matrix C + A * D * A^{T}
 template <typename T>
-void MatMatTransNumeric(int nrows, int ncols, const T *cvals,
-                        const int *rowp, const int *cols,
-                        const T *Avals, const T *dvals, const int *colp,
-                        const int *rows, const T *ATvals,
-                        const int *Bcolp, int *Brows, T *Bvals,
-                        int *flag, T *tmp) {
+void MatMatTransNumeric(int nrows, int ncols, const T *cvals, const int *rowp,
+                        const int *cols, const T *Avals, const T *dvals,
+                        const int *colp, const int *rows, const T *ATvals,
+                        const int *Bcolp, int *Brows, T *Bvals, int *flag,
+                        T *tmp) {
   for (int i = 0; i < nrows; i++) {
     flag[i] = -1;
   }
@@ -235,10 +230,9 @@ void MatMatTransNumeric(int nrows, int ncols, const T *cvals,
 }
 
 // Compute the number of entries in the matrix product A * A^{T}
-inline int MatMatTransSymbolic(int nrows, int ncols,
-                                   const int *rowp, const int *cols,
-                                   const int *colp, const int *rows,
-                                   int *Bcolp, int *flag) {
+inline int MatMatTransSymbolic(int nrows, int ncols, const int *rowp,
+                               const int *cols, const int *colp,
+                               const int *rows, int *Bcolp, int *flag) {
   for (int i = 0; i < nrows; i++) {
     Bcolp[i] = 0;
     flag[i] = -1;

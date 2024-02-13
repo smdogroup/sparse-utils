@@ -4,7 +4,7 @@
 #include "defs.h"
 #include "lapack.h"
 #include "sparse_matrix.h"
-#include "utils.h"
+#include "sparse_utils.h"
 
 // Include METIS
 extern "C" {
