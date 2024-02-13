@@ -6,19 +6,17 @@ project("SparseUtils"
   DESCRIPTION "A collection of sparse matrix data types and sparse solvers."
   HOMEPAGE_URL "https://github.com/smdogroup/sparse-utils"
   LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(cmake/utils.cmake)
 
 # Dependencies
 if(NOT DEFINED SPARSE_UTILS_METIS_DIR)
   set(SPARSE_UTILS_METIS_DIR $ENV{HOME}/installs/metis)
 endif()
 
-if(NOT EXISTS ${SPARSE_UTILS_METIS_DIR})
-  message(FATAL_ERROR "${SPARSE_UTILS_METIS_DIR} does not exist, please specify\
-  the path to a working metis installation by using\
-  -DSPARSE_UTILS_METIS_DIR=...")
-endif()
+check_path_and_inform(metis ${SPARSE_UTILS_METIS_DIR} SPARSE_UTILS_METIS_DIR)
+
+find_package(LAPACK REQUIRED)
 
 # Change the default value of CMAKE_INSTALL_PREFIX
 set(SPARSE_UTILS_INSTALL_DIR $ENV{HOME}/installs/sparse-utils)
@@ -30,16 +28,19 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
    ${SPARSE_UTILS_INSTALL_DIR}")
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
-# Some path variables
+# Utilities
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
-option(SPARSE_UTILS_BUILD_TESTS " Build unit tests " OFF)
-option(SPARSE_UTILS_INSTALL_LIBRARY " Enable installation " ${PROJECT_IS_TOP_LEVEL})
-
-find_package(LAPACK REQUIRED)
+option(SPARSE_UTILS_BUILD_TESTS "Build unit tests" OFF)
+option(SPARSE_UTILS_INSTALL_LIBRARY "Enable installation" ${PROJECT_IS_TOP_LEVEL})
 
 # Interface makes the target header-only that does not need to be compiled
 add_library(${PROJECT_NAME} INTERFACE)
+
+# Pass along c++17 requirements to projects using this library
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
+
 target_include_directories(
   ${PROJECT_NAME}
   INTERFACE
@@ -51,19 +52,16 @@ target_include_directories(${PROJECT_NAME} INTERFACE
   ${SPARSE_UTILS_METIS_DIR}/include)
 target_link_directories(
   ${PROJECT_NAME} INTERFACE ${SPARSE_UTILS_METIS_DIR}/lib)
-
 target_link_libraries(${PROJECT_NAME} INTERFACE metis LAPACK::LAPACK)
 
-# Pass along c++17 requirements to projects using this library
-target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
+# Set warning flags
+# TODO: specify warning flags for other compilers
+if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|GNU")
+  target_compile_options(${PROJECT_NAME} INTERFACE
+    -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-sign-compare
+  )
+endif()
 
-# # Set warning flags
-# # TODO: will this work for downstream projects? No
-# if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|GNU")
-# add_compile_options(
-# -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-sign-compare
-# )
-# endif()
 if(SPARSE_UTILS_INSTALL_LIBRARY)
   install(
     TARGETS ${PROJECT_NAME}
@@ -73,7 +71,6 @@ if(SPARSE_UTILS_INSTALL_LIBRARY)
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   )
 
-  include(CMakePackageConfigHelpers)
   write_basic_package_version_file("${PROJECT_NAME}ConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion)
@@ -101,7 +98,6 @@ if(SPARSE_UTILS_INSTALL_LIBRARY)
   install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 endif()
 
-# Build unit tests
 if(SPARSE_UTILS_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)

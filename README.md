@@ -6,7 +6,7 @@ solvers.
 
 ## Dependencies
 - LAPACK
-- metis
+- [metis-5.1.0](http://glaros.dtc.umn.edu/gkhome/metis/metis/download)
 
 ## Installation
 
