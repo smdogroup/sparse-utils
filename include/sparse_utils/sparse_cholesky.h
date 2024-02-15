@@ -45,8 +45,8 @@ class SparseCholesky {
                  CholOrderingType order = CholOrderingType::ND,
                  const int *_perm = nullptr, bool set_values = true) {
     check_type_and_warn();
-    construct_cholesky(csc_mat->nrows, (const int *)csc_mat->colp.data(),
-                       (const int *)csc_mat->rows.data(), order, _perm);
+    construct_cholesky(csc_mat->nrows, csc_mat->colp, csc_mat->rows, order,
+                       _perm);
     setValues(csc_mat);
   }
 
@@ -54,8 +54,7 @@ class SparseCholesky {
 
   // Set values into the Cholesky matrix
   void setValues(const CSCMat<T> *csc_mat) {
-    _setValues(csc_mat->ncols, (const int *)csc_mat->colp.data(),
-               (const int *)csc_mat->rows.data(), csc_mat->vals.data());
+    _setValues(csc_mat->ncols, csc_mat->colp, csc_mat->rows, csc_mat->vals);
   };
   void setValues(int n, const int Acolp[], const int Arows[], const T Avals[]) {
     _setValues(n, Acolp, Arows, Avals);

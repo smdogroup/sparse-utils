@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "sparse_cholesky.h"
+#include "sparse_utils/sparse_cholesky.h"
 
 using namespace SparseUtils;
 

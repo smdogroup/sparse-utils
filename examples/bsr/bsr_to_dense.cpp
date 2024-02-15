@@ -1,9 +1,9 @@
 #include <iostream>
 #include <unordered_set>
 
-#include "defs.h"
-#include "sparse_matrix.h"
-#include "utils.h"
+#include "sparse_utils/defs.h"
+#include "sparse_utils/matrix_utils.h"
+#include "sparse_utils/sparse_matrix.h"
 
 using namespace SparseUtils;
 

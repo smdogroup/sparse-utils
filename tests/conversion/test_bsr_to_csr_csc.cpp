@@ -1,10 +1,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include "defs.h"
-#include "sparse_matrix.h"
+#include "sparse_utils/defs.h"
+#include "sparse_utils/matrix_utils.h"
+#include "sparse_utils/sparse_matrix.h"
 #include "test_commons.h"
-#include "utils.h"
 
 using namespace SparseUtils;
 

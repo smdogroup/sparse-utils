@@ -1,3 +1,6 @@
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Download google test (git tag needs to be updated frequently)
 include(FetchContent)
 FetchContent_Declare(

@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include "defs.h"
+#include "sparse_utils/defs.h"
 
 namespace SparseUtils {
 
@@ -34,25 +34,25 @@ void print_mat(const MatType& mat) {
   EXPECT_NEAR(val1, val2, abs_err)
 
 #define _EXPECT_VEC_NEAR(m, vec, vals)   \
-  for (int i = 0; i < m; i++) {      \
+  for (int i = 0; i < m; i++) {          \
     EXPECT_NEAR(vec(i), vals[i], 1e-15); \
   }
 
 #define _EXPECT_VEC_NEAR_TOL(m, vec, vals, abs_err) \
-  for (int i = 0; i < m; i++) {                 \
+  for (int i = 0; i < m; i++) {                     \
     EXPECT_NEAR(vec(i), vals[i], abs_err);          \
   }
 
 #define _EXPECT_MAT_NEAR(m, n, mat, vals)             \
-  for (int i = 0; i < m; i++) {                   \
-    for (int j = 0; j < n; j++) {                 \
+  for (int i = 0; i < m; i++) {                       \
+    for (int j = 0; j < n; j++) {                     \
       EXPECT_NEAR(mat(i, j), vals[n * i + j], 1e-15); \
     }                                                 \
   }
 
 #define _EXPECT_MAT_NEAR_TOL(m, n, mat, vals, abs_err)  \
-  for (int i = 0; i < m; i++) {                     \
-    for (int j = 0; j < n; j++) {                   \
+  for (int i = 0; i < m; i++) {                         \
+    for (int j = 0; j < n; j++) {                       \
       EXPECT_NEAR(mat(i, j), vals[n * i + j], abs_err); \
     }                                                   \
   }
@@ -85,7 +85,7 @@ void print_mat(const MatType& mat) {
 // Usage:
 // - EXPECT_VEC_EQ(m, vec, vals)
 #define EXPECT_VEC_EQ(m, vec, vals) \
-  for (int i = 0; i < m; i++) { \
+  for (int i = 0; i < m; i++) {     \
     EXPECT_EQ(vec[i], vals[i]);     \
   }
 }  // namespace SparseUtils

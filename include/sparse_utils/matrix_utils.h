@@ -1,5 +1,5 @@
-#ifndef SPARSE_UTILS_UTILS_H
-#define SPARSE_UTILS_UTILS_H
+#ifndef SPARSE_UTILS_MATRIX_UTILS_H
+#define SPARSE_UTILS_MATRIX_UTILS_H
 
 #include <algorithm>
 
@@ -63,4 +63,4 @@ CSCMat<T> *bsr_to_csc(BSRMat<T, M, N> *bsr_mat);
 
 #include "sparse_utils/detail/matrix_utils_impl.h"
 
-#endif  // SPARSE_UTILS_UTILS_H
+#endif  // SPARSE_UTILS_MATRIX_UTILS_H

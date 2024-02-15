@@ -38,7 +38,7 @@ int BSRMat<T, M, N>::find_value_index(int row, int col) {
 /**
  * @brief add values from an element matrix mat of shape (m, n)
  *
- * @tparam Mat a matrix type whose entry can be ()-indexed
+ * @tparam M, N block size
  * @param m number of rows of mat
  * @param i global row indices for each entry of mat
  * @param n number of columns of mat
