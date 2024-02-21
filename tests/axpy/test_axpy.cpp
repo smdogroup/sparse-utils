@@ -14,7 +14,23 @@ void test_bsr_axpy(int nbrows, int nbcols, int nnz, std::vector<int>& rowp,
   EXPECT_VEC_NEAR(axpy.size(), axpy, axpy_exact, 1e-15);
 }
 
-TEST(BSRMatTest, axpy) {
+TEST(BSRMatTest, axpy1) {
+  constexpr int M = 2, N = 3;
+  int nbrows = 1, nbcols = 1, nnz = 1;
+  std::vector<int> rowp = {0, 1};
+  std::vector<int> cols = {0};
+  std::vector<double> vals = {0.9771692924038919, 0.9290711876005465,
+                              0.3136862324195067, 0.7128567315362718,
+                              0.7302925771728573, 0.0583724480810803};
+  std::vector<double> b = {0.6522552967793993, 0.8754643969143093,
+                           0.2173955785501254};
+  std::vector<double> axpy_exact = {1.5189265937438376, 1.1169996417569894};
+  test_bsr_axpy<double, M, N>(nbrows, nbcols, nnz, rowp, cols, vals, b,
+                              axpy_exact);
+}
+
+TEST(BSRMatTest, axpy2) {
+  constexpr int M = 1, N = 1;
   int nbrows = 8;
   int nbcols = 6;
   int nnz = 30;
@@ -40,6 +56,6 @@ TEST(BSRMatTest, axpy) {
                                     0.6007913606166261, 1.5500516159330469,
                                     1.162860613401067,  0.5939396197613945,
                                     1.2546274056033493, 0.8943836700535315};
-  test_bsr_axpy<double, 1, 1>(nbrows, nbcols, nnz, rowp, cols, vals, b,
+  test_bsr_axpy<double, M, N>(nbrows, nbcols, nnz, rowp, cols, vals, b,
                               axpy_exact);
 }
