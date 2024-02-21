@@ -25,6 +25,8 @@ extern void dgemm_(const char *ta, const char *tb, int *m, int *n, int *k,
                    double *alpha, double *a, int *lda, double *b, int *ldb,
                    double *beta, double *c, int *ldc);
 extern void dgetrf_(int *m, int *n, double *a, int *lda, int *ipiv, int *info);
+extern void dgetri_(int *n, double *a, int *lda, int *ipiv, double *work,
+                    int *lwork, int *info);
 extern void dgetrs_(const char *c, int *n, int *nrhs, double *a, int *lda,
                     int *ipiv, double *b, int *ldb, int *info);
 extern void dpptrf_(const char *c, int *n, double *ap, int *info);
@@ -61,6 +63,8 @@ extern void zgemm_(const char *ta, const char *tb, int *m, int *n, int *k,
                    int *ldc);
 extern void zgetrf_(int *m, int *n, std::complex<double> *a, int *lda,
                     int *ipiv, int *info);
+extern void zgetri_(int *n, std::complex<double> *a, int *lda, int *ipiv,
+                    std::complex<double> *work, int *lwork, int *info);
 extern void zgetrs_(const char *c, int *n, int *nrhs, std::complex<double> *a,
                     int *lda, int *ipiv, std::complex<double> *b, int *ldb,
                     int *info);
@@ -124,6 +128,10 @@ inline void LAPACKgetrf(int *m, int *n, double *a, int *lda, int *ipiv,
 inline void LAPACKgetrs(const char *c, int *n, int *nrhs, double *a, int *lda,
                         int *ipiv, double *b, int *ldb, int *info) {
   return dgetrs_(c, n, nrhs, a, lda, ipiv, b, ldb, info);
+}
+inline void LAPACKgetri(int *n, double *a, int *lda, int *ipiv, double *work,
+                        int *lwork, int *info) {
+  return dgetri_(n, a, lda, ipiv, work, lwork, info);
 }
 
 // Factorization of packed-storage matrices
@@ -198,6 +206,10 @@ inline void LAPACKgetrs(const char *c, int *n, int *nrhs,
                         std::complex<double> *a, int *lda, int *ipiv,
                         std::complex<double> *b, int *ldb, int *info) {
   return zgetrs_(c, n, nrhs, a, lda, ipiv, b, ldb, info);
+}
+inline void LAPACKgetri(int *n, std::complex<double> *a, int *lda, int *ipiv,
+                        std::complex<double> *work, int *lwork, int *info) {
+  return zgetri_(n, a, lda, ipiv, work, lwork, info);
 }
 
 // Factorization of packed-storage matrices

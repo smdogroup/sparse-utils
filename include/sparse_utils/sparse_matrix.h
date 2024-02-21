@@ -91,6 +91,9 @@ class BSRMat {
   // Zero out rows and set diagonal entry to one for each zeroed row
   void zero_rows(const int nbcs, const int dof[]);
 
+  // Matrix-vector multiplication
+  void apply(T x[], T y[]);
+
   // Convert to a dense matrix
   void to_dense(int *m_, int *n_, T **A_);
 

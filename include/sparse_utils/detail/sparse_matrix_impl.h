@@ -121,6 +121,28 @@ void BSRMat<T, M, N>::zero_rows(const int nbcs, const int dof[]) {
 }
 
 /**
+ * @brief compute y += Ax
+ *
+ * @param x input vector that has size N * nbcols
+ * @param y output vector that has size N * nbcols
+ */
+template <typename T, int M, int N>
+void BSRMat<T, M, N>::apply(T x[], T y[]) {
+  for (int i = 0; i < nbrows; i++) {
+    for (int jp = rowp[i]; jp < rowp[i + 1]; jp++) {
+      int j = cols[jp];
+      for (int ii = 0; ii < M; ii++) {
+        T prod = 0.0;
+        for (int jj = 0; jj < N; jj++) {
+          prod += vals[M * N * jp + N * ii + jj] * x[N * j + jj];
+        }
+        y[M * i + ii] += prod;
+      }
+    }
+  }
+}
+
+/**
  * @brief Convert to a dense matrix
  *
  * @param m_ output, number of rows of the dense matrix
