@@ -11,3 +11,4 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 add_subdirectory(conversion)
+add_subdirectory(axpy)

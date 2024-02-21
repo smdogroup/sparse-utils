@@ -35,12 +35,12 @@ void print_mat(const MatType& mat) {
 
 #define _EXPECT_VEC_NEAR(m, vec, vals)   \
   for (int i = 0; i < m; i++) {          \
-    EXPECT_NEAR(vec(i), vals[i], 1e-15); \
+    EXPECT_NEAR(vec[i], vals[i], 1e-15); \
   }
 
 #define _EXPECT_VEC_NEAR_TOL(m, vec, vals, abs_err) \
   for (int i = 0; i < m; i++) {                     \
-    EXPECT_NEAR(vec(i), vals[i], abs_err);          \
+    EXPECT_NEAR(vec[i], vals[i], abs_err);          \
   }
 
 #define _EXPECT_MAT_NEAR(m, n, mat, vals)             \

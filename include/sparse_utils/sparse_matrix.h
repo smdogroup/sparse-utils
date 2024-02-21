@@ -49,9 +49,8 @@ class BSRMat {
    * @param rowp_ vector of row pointers
    * @param cols_ vector of column indices
    */
-  template <class VecType>
-  BSRMat(int nbrows, int nbcols, int nnz, const VecType &rowp_,
-         const VecType &cols_)
+  BSRMat(int nbrows, int nbcols, int nnz, const int *rowp_, const int *cols_,
+         const T *vals_ = nullptr)
       : nbrows(nbrows), nbcols(nbcols), nnz(nnz) {
     rowp = new int[nbrows + 1];
     cols = new int[nnz];
@@ -63,6 +62,12 @@ class BSRMat {
 
     for (int i = 0; i < nnz; i++) {
       cols[i] = cols_[i];
+    }
+
+    if (vals_) {
+      for (int i = 0; i < M * N * nnz; i++) {
+        vals[i] = vals_[i];
+      }
     }
   }
 
@@ -92,7 +97,7 @@ class BSRMat {
   void zero_rows(const int nbcs, const int dof[]);
 
   // Matrix-vector multiplication
-  void apply(T x[], T y[]);
+  void axpy(T x[], T y[]);
 
   // Convert to a dense matrix
   void to_dense(int *m_, int *n_, T **A_);

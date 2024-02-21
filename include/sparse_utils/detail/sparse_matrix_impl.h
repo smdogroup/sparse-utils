@@ -127,7 +127,7 @@ void BSRMat<T, M, N>::zero_rows(const int nbcs, const int dof[]) {
  * @param y output vector that has size N * nbcols
  */
 template <typename T, int M, int N>
-void BSRMat<T, M, N>::apply(T x[], T y[]) {
+void BSRMat<T, M, N>::axpy(T x[], T y[]) {
   for (int i = 0; i < nbrows; i++) {
     for (int jp = rowp[i]; jp < rowp[i + 1]; jp++) {
       int j = cols[jp];
