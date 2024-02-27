@@ -91,15 +91,14 @@ void NodeToElementFromConnectivityFunctor(int num_nodes, int num_elements,
   *node_to_elem_ = node_to_elem;
 }
 
-void CSRFromConnectivityFunctor(int num_nodes, int num_elements,
-                                const int nodes_per_element,
-                                const int* element_nodes, int** rowp_,
-                                int** cols_) {
+void CSRFromConnectivity(int num_nodes, int num_elements,
+                         const int nodes_per_element, const int* element_nodes,
+                         int** rowp_, int** cols_) {
   int* node_to_elem_ptr = nullptr;
   int* node_to_elem = nullptr;
-  NodeToElementFromConnectivityFunctor(num_nodes, num_elements,
-                                       nodes_per_element, element_nodes,
-                                       &node_to_elem_ptr, &node_to_elem);
+  NodeToElementFromConnectivity(num_nodes, num_elements, nodes_per_element,
+                                element_nodes, &node_to_elem_ptr,
+                                &node_to_elem);
 
   // Set up the CSR data structure
   int* rowp = new int[num_nodes + 1];
@@ -159,15 +158,15 @@ void CSRFromConnectivityFunctor(int num_nodes, int num_elements,
 }
 
 template <class Func>
-void CSRFromConnectivity(int num_nodes, int num_elements,
-                         const int nodes_per_element,
-                         const Func& element_nodes_func, int** rowp_,
-                         int** cols_) {
+void CSRFromConnectivityFunctor(int num_nodes, int num_elements,
+                                const int nodes_per_element,
+                                const Func& element_nodes_func, int** rowp_,
+                                int** cols_) {
   int* node_to_elem_ptr = nullptr;
   int* node_to_elem = nullptr;
-  NodeToElementFromConnectivity(num_nodes, num_elements, nodes_per_element,
-                                element_nodes_func, &node_to_elem_ptr,
-                                &node_to_elem);
+  NodeToElementFromConnectivityFunctor(num_nodes, num_elements,
+                                       nodes_per_element, element_nodes_func,
+                                       &node_to_elem_ptr, &node_to_elem);
 
   // Set up the CSR data structure
   int* rowp = new int[num_nodes + 1];
