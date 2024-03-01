@@ -68,6 +68,8 @@ class BSRMat {
       for (int i = 0; i < M * N * nnz; i++) {
         vals[i] = vals_[i];
       }
+    } else {
+      zero();
     }
   }
 
