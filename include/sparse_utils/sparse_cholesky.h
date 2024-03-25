@@ -2,7 +2,7 @@
 #define SPARSE_UTILS_SPARSE_CHOLESKY_H
 
 #include "defs.h"
-#include "lapack.h"
+#include "lapack_helpers.h"
 #include "sparse_matrix.h"
 #include "sparse_utils.h"
 

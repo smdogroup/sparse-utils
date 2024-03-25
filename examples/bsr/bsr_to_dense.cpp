@@ -49,7 +49,8 @@ int main() {
     }
   }
 
-  BSRMat_t* bsr_mat = new BSRMat_t(nbrows, nbcols, nnz, rowp, cols);
+  BSRMat_t* bsr_mat =
+      new BSRMat_t(nbrows, nbcols, nnz, rowp.data(), cols.data());
 
   for (int n = 0; n < nnz; n++) {
     for (int ii = 0; ii < M; ii++) {

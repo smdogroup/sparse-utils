@@ -5,7 +5,7 @@ library that contains sparse matrix data structures and sparse direct/iterator
 solvers.
 
 ## Dependencies
-- LAPACK
+- CBLAS and LAPACK
 - [metis-5.1.0](http://glaros.dtc.umn.edu/gkhome/metis/metis/download)
 
 ## Installation

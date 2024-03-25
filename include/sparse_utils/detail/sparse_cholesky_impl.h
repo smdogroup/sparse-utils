@@ -370,7 +370,8 @@ void SparseCholesky<T>::updateDiag(const int lsize, const int nlrows,
   int n = nlrows;
   int k = lsize;
   T alpha = 1.0, beta = 0.0;
-  BLASsyrk("L", "T", &n, &k, &alpha, L, &k, &beta, work, &n);
+  BLASsyrk(CblasColMajor, CblasLower, CblasTrans, n, k, alpha, L, k, beta, work,
+           n);
 
   // Add D <- D - L * L^{T}
   for (int jj = 0; jj < nlrows; jj++) {
@@ -414,8 +415,8 @@ void SparseCholesky<T>::updateWorkColumn(int lwidth, int n21rows, T *L21,
   // dimension of L21 is n21rows X lwidth
   // dimension of L31^{T} is lwidth X n31rows
   T alpha = 1.0, beta = 0.0;
-  BLASgemm("T", "N", &n21rows, &n31rows, &lwidth, &alpha, L21, &lwidth, L31,
-           &lwidth, &beta, temp, &n21rows);
+  BLASgemm(CblasColMajor, CblasTrans, CblasNoTrans, n21rows, n31rows, lwidth,
+           alpha, L21, lwidth, L31, lwidth, beta, temp, n21rows);
 }
 
 /**
@@ -470,7 +471,8 @@ template <typename T>
 void SparseCholesky<T>::solveDiag(int diag_size, T *L, int nrhs, T *x) {
   int incr = 1;
   for (int k = 0; k < nrhs; k++) {
-    BLAStpsv("U", "T", "N", &diag_size, L, x, &incr);
+    BLAStpsv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, diag_size, L,
+             x, incr);
     x += diag_size;
   }
 }
@@ -483,7 +485,8 @@ void SparseCholesky<T>::solveDiagTranspose(int diag_size, T *L, int nrhs,
                                            T *x) {
   int incr = 1;
   for (int k = 0; k < nrhs; k++) {
-    BLAStpsv("U", "N", "N", &diag_size, L, x, &incr);
+    BLAStpsv(CblasColMajor, CblasUpper, CblasNoTrans, CblasNonUnit, diag_size,
+             L, x, incr);
     x += diag_size;
   }
 }
