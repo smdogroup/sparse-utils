@@ -5,3 +5,4 @@ check_required_components("@PROJECT_NAME@")
 
 include(CMakeFindDependencyMacro)
 find_dependency(LAPACK)
+find_dependency(LAPACKE PATHS @SPARSE_UTILS_LAPACKE_DIR@)

@@ -459,8 +459,8 @@ void SparseCholesky<T>::updateColumn(const int lwidth, const int nlcols,
 */
 template <typename T>
 int SparseCholesky<T>::factorDiag(const int diag_size, T *D) {
-  int n = diag_size, info;
-  LAPACKpptrf("U", &n, D, &info);
+  int info = -1;
+  LAPACKpptrf('U', diag_size, D, &info);
   return info;
 }
 

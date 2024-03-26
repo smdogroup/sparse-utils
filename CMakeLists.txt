@@ -14,9 +14,15 @@ if(NOT DEFINED SPARSE_UTILS_METIS_DIR)
   set(SPARSE_UTILS_METIS_DIR $ENV{HOME}/installs/metis)
 endif()
 
+if(NOT DEFINED SPARSE_UTILS_LAPACKE_DIR)
+  set(SPARSE_UTILS_LAPACKE_DIR /opt/homebrew/opt/lapack)
+endif()
+
 check_path_and_inform(metis ${SPARSE_UTILS_METIS_DIR} SPARSE_UTILS_METIS_DIR)
+check_path_and_inform(lapacke ${SPARSE_UTILS_LAPACKE_DIR} SPARSE_UTILS_LAPACKE_DIR)
 
 find_package(LAPACK REQUIRED)
+find_package(LAPACKE REQUIRED PATHS ${SPARSE_UTILS_LAPACKE_DIR})
 
 # Change the default value of CMAKE_INSTALL_PREFIX
 set(SPARSE_UTILS_INSTALL_DIR $ENV{HOME}/installs/sparse-utils)
@@ -38,6 +44,9 @@ option(SPARSE_UTILS_INSTALL_LIBRARY "Enable installation" ${PROJECT_IS_TOP_LEVEL
 # Interface makes the target header-only that does not need to be compiled
 add_library(${PROJECT_NAME} INTERFACE)
 
+# Use std::complex<double> instead of the default C99 complex type for LAPACKE
+target_compile_definitions(${PROJECT_NAME} INTERFACE -Dlapack_complex_double=std::complex<double>)
+
 # Pass along c++17 requirements to projects using this library
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 
@@ -52,7 +61,7 @@ target_include_directories(${PROJECT_NAME} INTERFACE
   ${SPARSE_UTILS_METIS_DIR}/include)
 target_link_directories(
   ${PROJECT_NAME} INTERFACE ${SPARSE_UTILS_METIS_DIR}/lib)
-target_link_libraries(${PROJECT_NAME} INTERFACE metis LAPACK::LAPACK)
+target_link_libraries(${PROJECT_NAME} INTERFACE metis LAPACK::LAPACK lapacke)
 
 # Set warning flags
 # TODO: specify warning flags for other compilers

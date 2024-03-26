@@ -1,22 +1,30 @@
 #ifndef SPARSE_UTILS_LAPACK_H
 #define SPARSE_UTILS_LAPACK_H
-#include <complex.h>
 
+#include <complex>
+
+// C BLAS wrappers
 #ifdef __APPLE__
-#define ACCELERATE_NEW_LAPACK
+#define __CLAPACK_H  // Don't include clapack.h from Accelerate
 #include <Accelerate/Accelerate.h>
 #else
 #include <cblas.h>
-#include <lapack.h>
 #endif
 
-#include <complex>
+// C LAPACK wrappers from LAPACKE
+// #ifndef lapack_complex_double
+// #define lapack_complex_double std::complex<double>
+// #endif
+#include <lapacke.h>
 
 namespace SparseUtils {
 
 /**
  * To add more BLAS wrappers, refer to the official API at
  * https://www.netlib.org/blas/cblas.h
+ *
+ * To add more LAPACK wrappers, refer to lapacke's APIs:
+ * https://www.netlib.org/lapack/lapacke.html
  */
 
 /* BLAS/LAPACK functions for double precision real datatype */
@@ -74,26 +82,26 @@ inline void BLASgemm(const enum CBLAS_ORDER Order,
 }
 
 // General factorization routines
-inline void LAPACKgetrf(int *m, int *n, double *a, int *lda, int *ipiv,
+inline void LAPACKgetrf(int m, int n, double *a, int lda, int *ipiv,
                         int *info) {
-  return dgetrf_(m, n, a, lda, ipiv, info);
+  *info = LAPACKE_dgetrf(LAPACK_COL_MAJOR, m, n, a, lda, ipiv);
 }
-inline void LAPACKgetrs(const char *c, int *n, int *nrhs, double *a, int *lda,
-                        int *ipiv, double *b, int *ldb, int *info) {
-  return dgetrs_(c, n, nrhs, a, lda, ipiv, b, ldb, info);
+inline void LAPACKgetrs(char c, int n, int nrhs, double *a, int lda, int *ipiv,
+                        double *b, int ldb, int *info) {
+  *info = LAPACKE_dgetrs(LAPACK_COL_MAJOR, c, n, nrhs, a, lda, ipiv, b, ldb);
 }
-inline void LAPACKgetri(int *n, double *a, int *lda, int *ipiv, double *work,
-                        int *lwork, int *info) {
-  return dgetri_(n, a, lda, ipiv, work, lwork, info);
+inline void LAPACKgetri(int n, double *a, int lda, int *ipiv, double *work,
+                        int lwork, int *info) {
+  *info = LAPACKE_dgetri_work(LAPACK_COL_MAJOR, n, a, lda, ipiv, work, lwork);
 }
 
 // Factorization of packed-storage matrices
-inline void LAPACKpptrf(const char *c, int *n, double *ap, int *info) {
-  return dpptrf_(c, n, ap, info);
+inline void LAPACKpptrf(char c, int n, double *ap, int *info) {
+  *info = LAPACKE_dpptrf(LAPACK_COL_MAJOR, c, n, ap);
 }
-inline void LAPACKpptrs(const char *c, int *n, int *nrhs, double *ap,
-                        double *rhs, int *ldrhs, int *info) {
-  return dpptrs_(c, n, nrhs, ap, rhs, ldrhs, info);
+inline void LAPACKpptrs(char c, int n, int nrhs, double *ap, double *rhs,
+                        int ldrhs, int *info) {
+  *info = LAPACKE_dpptrs(LAPACK_COL_MAJOR, c, n, nrhs, ap, rhs, ldrhs);
 }
 
 /* BLAS/LAPACK functions for double precision complex datatype */
@@ -117,8 +125,8 @@ inline void BLASscal(int n, std::complex<double> *a, std::complex<double> *x,
   return cblas_zscal(n, a, x, incx);
 }
 
-// Compute C := alpha*A*A**std::complex<double> + beta*C or C :=
-// alpha*A**std::complex<double>*A + beta*C
+// Compute C := alpha*A*A**T + beta*C or C :=
+// alpha*A**T*A + beta*C
 inline void BLASsyrk(const enum CBLAS_ORDER Order, const enum CBLAS_UPLO Uplo,
                      const enum CBLAS_TRANSPOSE Trans, int n, int k,
                      std::complex<double> *alpha, std::complex<double> *a,
@@ -127,7 +135,7 @@ inline void BLASsyrk(const enum CBLAS_ORDER Order, const enum CBLAS_UPLO Uplo,
   return cblas_zsyrk(Order, Uplo, Trans, n, k, alpha, a, lda, beta, c, ldc);
 }
 
-// Solve A*x = b or A^std::complex<double>*x = b where A is in packed format
+// Solve A*x = b or A^T*x = b where A is in packed format
 inline void BLAStpsv(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
                      const enum CBLAS_TRANSPOSE TransA,
                      const enum CBLAS_DIAG Diag, int n, std::complex<double> *a,
@@ -161,36 +169,34 @@ inline void BLASgemm(const enum CBLAS_ORDER Order,
 }
 
 // General factorization routines
-inline void LAPACKgetrf(int *m, int *n, std::complex<double> *a, int *lda,
+inline void LAPACKgetrf(int m, int n, std::complex<double> *a, int lda,
                         int *ipiv, int *info) {
-  return zgetrf_(m, n, a, lda, ipiv, info);
+  *info = LAPACKE_zgetrf(LAPACK_COL_MAJOR, m, n, a, lda, ipiv);
 }
-inline void LAPACKgetrs(const char *c, int *n, int *nrhs,
-                        std::complex<double> *a, int *lda, int *ipiv,
-                        std::complex<double> *b, int *ldb, int *info) {
-  return zgetrs_(c, n, nrhs, a, lda, ipiv, b, ldb, info);
+inline void LAPACKgetrs(char c, int n, int nrhs, std::complex<double> *a,
+                        int lda, int *ipiv, std::complex<double> *b, int ldb,
+                        int *info) {
+  *info = LAPACKE_zgetrs(LAPACK_COL_MAJOR, c, n, nrhs, a, lda, ipiv, b, ldb);
 }
-inline void LAPACKgetri(int *n, std::complex<double> *a, int *lda, int *ipiv,
-                        std::complex<double> *work, int *lwork, int *info) {
-  return zgetri_(n, a, lda, ipiv, work, lwork, info);
+inline void LAPACKgetri(int n, std::complex<double> *a, int lda, int *ipiv,
+                        std::complex<double> *work, int lwork, int *info) {
+  *info = LAPACKE_zgetri_work(LAPACK_COL_MAJOR, n, a, lda, ipiv, work, lwork);
 }
 
 // Factorization of packed-storage matrices
-inline void LAPACKpptrf(const char *c, int *n, std::complex<double> *ap,
-                        int *info) {
-  return zpptrf_(c, n, ap, info);
+inline void LAPACKpptrf(char c, int n, std::complex<double> *ap, int *info) {
+  *info = LAPACKE_zpptrf(LAPACK_COL_MAJOR, c, n, ap);
 }
-inline void LAPACKpptrs(const char *c, int *n, int *nrhs,
-                        std::complex<double> *ap, std::complex<double> *rhs,
-                        int *ldrhs, int *info) {
-  return zpptrs_(c, n, nrhs, ap, rhs, ldrhs, info);
+inline void LAPACKpptrs(char c, int n, int nrhs, std::complex<double> *ap,
+                        std::complex<double> *rhs, int ldrhs, int *info) {
+  *info = LAPACKE_zpptrs(LAPACK_COL_MAJOR, c, n, nrhs, ap, rhs, ldrhs);
 }
 
 // Solve a real eigenvalue problem
-inline void LAPACKdspev(const char *job, const char *uplo, int *n, double *a,
-                        double *w, double *z, int *ldz, double *work,
-                        int *info) {
-  dspev_(job, uplo, n, a, w, z, ldz, work, info);
+inline void LAPACKdspev(char job, char uplo, int n, double *a, double *w,
+                        double *z, int ldz, double *work, int *info) {
+  *info =
+      LAPACKE_dspev_work(LAPACK_COL_MAJOR, job, uplo, n, a, w, z, ldz, work);
 }
 
 }  // namespace SparseUtils
