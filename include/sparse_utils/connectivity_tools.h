@@ -48,7 +48,7 @@ void NodeToElementFromConnectivity(int num_nodes, int num_elements,
 
 template <class Func>
 void NodeToElementFromConnectivityFunctor(int num_nodes, int num_elements,
-                                          const int nodes_per_element,
+                                          const int max_nnodes_per_element,
                                           const Func& element_nodes_func,
                                           int** node_to_elem_ptr_,
                                           int** node_to_elem_) {
@@ -58,10 +58,10 @@ void NodeToElementFromConnectivityFunctor(int num_nodes, int num_elements,
     node_to_elem_ptr[i] = 0;
   }
 
-  int nodes[nodes_per_element];
+  int nodes[max_nnodes_per_element];
   for (int i = 0; i < num_elements; i++) {
-    element_nodes_func(i, nodes);
-    for (int j = 0; j < nodes_per_element; j++) {
+    int nnodes = element_nodes_func(i, nodes);
+    for (int j = 0; j < nnodes; j++) {
       node_to_elem_ptr[nodes[j] + 1]++;
     }
   }
@@ -73,8 +73,8 @@ void NodeToElementFromConnectivityFunctor(int num_nodes, int num_elements,
   // Set up the node to element data
   int* node_to_elem = new int[node_to_elem_ptr[num_nodes]];
   for (int i = 0; i < num_elements; i++) {
-    element_nodes_func(i, nodes);
-    for (int j = 0; j < nodes_per_element; j++) {
+    int nnodes = element_nodes_func(i, nodes);
+    for (int j = 0; j < nnodes; j++) {
       int node = nodes[j];
       node_to_elem[node_to_elem_ptr[node]] = i;
       node_to_elem_ptr[node]++;
@@ -159,14 +159,14 @@ void CSRFromConnectivity(int num_nodes, int num_elements,
 
 template <class Func>
 void CSRFromConnectivityFunctor(int num_nodes, int num_elements,
-                                const int nodes_per_element,
+                                const int max_nnodes_per_element,
                                 const Func& element_nodes_func, int** rowp_,
                                 int** cols_) {
   int* node_to_elem_ptr = nullptr;
   int* node_to_elem = nullptr;
-  NodeToElementFromConnectivityFunctor(num_nodes, num_elements,
-                                       nodes_per_element, element_nodes_func,
-                                       &node_to_elem_ptr, &node_to_elem);
+  NodeToElementFromConnectivityFunctor(
+      num_nodes, num_elements, max_nnodes_per_element, element_nodes_func,
+      &node_to_elem_ptr, &node_to_elem);
 
   // Set up the CSR data structure
   int* rowp = new int[num_nodes + 1];
@@ -179,12 +179,12 @@ void CSRFromConnectivityFunctor(int num_nodes, int num_elements,
 
   // Count up the number of non-zero entries
   rowp[0] = 0;
-  int nodes[nodes_per_element];
+  int nodes[max_nnodes_per_element];
   for (int i = 0, nnz = 0; i < num_nodes; i++) {
     for (int j = node_to_elem_ptr[i]; j < node_to_elem_ptr[i + 1]; j++) {
       int elem = node_to_elem[j];
-      element_nodes_func(elem, nodes);
-      for (int k = 0; k < nodes_per_element; k++) {
+      int nnodes = element_nodes_func(elem, nodes);
+      for (int k = 0; k < nnodes; k++) {
         int node = nodes[k];
         if (counter[node] < i) {
           counter[node] = i;
@@ -207,8 +207,8 @@ void CSRFromConnectivityFunctor(int num_nodes, int num_elements,
   for (int i = 0, nnz = 0; i < num_nodes; i++) {
     for (int j = node_to_elem_ptr[i]; j < node_to_elem_ptr[i + 1]; j++) {
       int elem = node_to_elem[j];
-      element_nodes_func(elem, nodes);
-      for (int k = 0; k < nodes_per_element; k++) {
+      int nnodes = element_nodes_func(elem, nodes);
+      for (int k = 0; k < nnodes; k++) {
         int node = nodes[k];
         if (counter[node] < i) {
           counter[node] = i;
