@@ -81,6 +81,11 @@ inline void BLASgemm(const enum CBLAS_ORDER Order,
                      beta, C, ldc);
 }
 
+// Matrix norm
+double LAPACKlange(char norm, int m, int n, const double *a, int lda) {
+  return LAPACKE_dlange(LAPACK_COL_MAJOR, norm, m, n, a, lda);
+}
+
 // General factorization routines
 inline void LAPACKgetrf(int m, int n, double *a, int lda, int *ipiv,
                         int *info) {
@@ -94,7 +99,10 @@ inline void LAPACKgetri(int n, double *a, int lda, int *ipiv, double *work,
                         int lwork, int *info) {
   *info = LAPACKE_dgetri_work(LAPACK_COL_MAJOR, n, a, lda, ipiv, work, lwork);
 }
-
+inline void LAPACKgecon(char norm, int n, double *a, int lda, double anorm,
+                        double *rcond, int *info) {
+  *info = LAPACKE_dgecon(LAPACK_COL_MAJOR, norm, n, a, lda, anorm, rcond);
+}
 // Factorization of packed-storage matrices
 inline void LAPACKpptrf(char c, int n, double *ap, int *info) {
   *info = LAPACKE_dpptrf(LAPACK_COL_MAJOR, c, n, ap);
@@ -168,6 +176,12 @@ inline void BLASgemm(const enum CBLAS_ORDER Order,
                      beta, c, ldc);
 }
 
+// Matrix norm
+double LAPACKlange(char norm, int m, int n, const std::complex<double> *a,
+                   int lda) {
+  return LAPACKE_zlange(LAPACK_COL_MAJOR, norm, m, n, a, lda);
+}
+
 // General factorization routines
 inline void LAPACKgetrf(int m, int n, std::complex<double> *a, int lda,
                         int *ipiv, int *info) {
@@ -181,6 +195,10 @@ inline void LAPACKgetrs(char c, int n, int nrhs, std::complex<double> *a,
 inline void LAPACKgetri(int n, std::complex<double> *a, int lda, int *ipiv,
                         std::complex<double> *work, int lwork, int *info) {
   *info = LAPACKE_zgetri_work(LAPACK_COL_MAJOR, n, a, lda, ipiv, work, lwork);
+}
+inline void LAPACKgecon(char norm, int n, std::complex<double> *a, int lda,
+                        double anorm, double *rcond, int *info) {
+  *info = LAPACKE_zgecon(LAPACK_COL_MAJOR, norm, n, a, lda, anorm, rcond);
 }
 
 // Factorization of packed-storage matrices
