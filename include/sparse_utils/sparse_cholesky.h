@@ -1,10 +1,12 @@
 #ifndef SPARSE_UTILS_SPARSE_CHOLESKY_H
 #define SPARSE_UTILS_SPARSE_CHOLESKY_H
 
+#include <iostream>
+
 #include "defs.h"
 #include "lapack_helpers.h"
+#include "matrix_utils.h"
 #include "sparse_matrix.h"
-#include "sparse_utils.h"
 
 // Include METIS
 extern "C" {
