@@ -9,20 +9,33 @@ project("SparseUtils"
 
 include(cmake/utils.cmake)
 
+option(SPARSE_UTILS_BLAS_DIR "root dir for blas+lapack+lapacke suite" "")
+
 # Dependencies
 if(NOT DEFINED SPARSE_UTILS_METIS_DIR)
   set(SPARSE_UTILS_METIS_DIR $ENV{HOME}/installs/metis)
 endif()
 
-if(NOT DEFINED SPARSE_UTILS_LAPACKE_DIR)
-  set(SPARSE_UTILS_LAPACKE_DIR /opt/homebrew/opt/lapack)
-endif()
+
+# if(NOT DEFINED SPARSE_UTILS_LAPACKE_DIR)
+#   set(SPARSE_UTILS_LAPACKE_DIR /opt/homebrew/opt/lapack)
+# endif()
+#
+# if(NOT DEFINED SPARSE_UTILS_LAPACK_DIR)
+#   set(SPARSE_UTILS_LAPACK_DIR /opt/homebrew/opt/lapack)
+# endif()
 
 check_path_and_inform(metis ${SPARSE_UTILS_METIS_DIR} SPARSE_UTILS_METIS_DIR)
-check_path_and_inform(lapacke ${SPARSE_UTILS_LAPACKE_DIR} SPARSE_UTILS_LAPACKE_DIR)
+# check_path_and_inform(lapack ${SPARSE_UTILS_LAPACK_DIR} SPARSE_UTILS_LAPACK_DIR)
+# check_path_and_inform(lapacke ${SPARSE_UTILS_LAPACKE_DIR} SPARSE_UTILS_LAPACKE_DIR)
 
-find_package(LAPACK REQUIRED)
-find_package(LAPACKE REQUIRED PATHS ${SPARSE_UTILS_LAPACKE_DIR})
+if(SPARSE_UTILS_BLAS_DIR)
+  check_path_and_inform(blas/lapack/lapacke ${SPARSE_UTILS_BLAS_DIR} SPARSE_UTILS_BLAS_DIR)
+endif()
+
+# find_package(LAPACK REQUIRED PATHS ${SPARSE_UTILS_LAPACK_DIR})
+# find_package(LAPACKE REQUIRED PATHS ${SPARSE_UTILS_LAPACKE_DIR})
+find_package(BLAS REQUIRED)
 
 # Change the default value of CMAKE_INSTALL_PREFIX
 set(SPARSE_UTILS_INSTALL_DIR $ENV{HOME}/installs/sparse-utils)
@@ -58,10 +71,13 @@ target_include_directories(
 
 # Dependencies
 target_include_directories(${PROJECT_NAME} INTERFACE
-  ${SPARSE_UTILS_METIS_DIR}/include)
+  ${SPARSE_UTILS_METIS_DIR}/include
+)
 target_link_directories(
-  ${PROJECT_NAME} INTERFACE ${SPARSE_UTILS_METIS_DIR}/lib)
-target_link_libraries(${PROJECT_NAME} INTERFACE metis LAPACK::LAPACK lapacke)
+  ${PROJECT_NAME} INTERFACE
+  ${SPARSE_UTILS_METIS_DIR}/lib
+)
+target_link_libraries(${PROJECT_NAME} INTERFACE metis openblas)
 
 # Set warning flags
 # TODO: specify warning flags for other compilers
