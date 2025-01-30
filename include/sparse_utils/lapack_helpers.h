@@ -114,6 +114,7 @@ inline void LAPACKpptrs(char c, int n, int nrhs, double *ap, double *rhs,
 
 /* BLAS/LAPACK functions for double precision complex datatype */
 
+#if 0
 // Level 1 BLAS routines
 inline std::complex<double> BLASdot(int n, std::complex<double> *x, int incx,
                                     std::complex<double> *y, int incy) {
@@ -216,6 +217,7 @@ inline void LAPACKdspev(char job, char uplo, int n, double *a, double *w,
   *info =
       LAPACKE_dspev_work(LAPACK_COL_MAJOR, job, uplo, n, a, w, z, ldz, work);
 }
+#endif
 
 }  // namespace SparseUtils
 

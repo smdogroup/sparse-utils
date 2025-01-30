@@ -8,7 +8,8 @@
 
 #include "sparse_amd.h"
 #include "sparse_matrix.h"
-#include "utils/a2dprofiler.h"
+// #include "utils/a2dprofiler.h"
+#include "a2dprofiler.h"
 
 namespace SparseUtils {
 
@@ -42,6 +43,7 @@ void SortCSRData(index_t nrows, ArrayType& rowp, ArrayType& cols) {
 /*
   Add the connectivity from a connectivity list, use Kokkos unordered set
 */
+#if 0
 template <class ConnArray>
 void BSRMatAddConnectivity(ConnArray& conn,
                            Kokkos::UnorderedMap<COO, void>& node_set) {
@@ -145,6 +147,7 @@ BSRMat<T, M, M>* BSRMatFromNodeSet(index_t nnodes,
 
   return A;
 }
+#endif
 
 #if 0
 /*
@@ -364,6 +367,8 @@ index_t CSRFactorSymbolic(const index_t nrows, const VecType Arowp,
 /*
   Find the reordering to reduce the fill in during factorization
 */
+// need to add this back for re-ordering version and fix a2d-multiphysics code
+#if 0
 template <typename T, index_t M>
 BSRMat<T, M, M>* BSRMatAMDFactorSymbolic(BSRMat<T, M, M>& A,
                                          double fill_factor = 5.0) {
@@ -441,6 +446,7 @@ BSRMat<T, M, M>* BSRMatAMDFactorSymbolic(BSRMat<T, M, M>& A,
 
   return Afactor;
 }
+#endif
 
 /*
   Symbolic factorization stage
@@ -459,6 +465,7 @@ BSRMat<T, M, M>* BSRMatFactorSymbolic(BSRMat<T, M, M>& A,
   return Afactor;
 }
 
+#if 0
 /*
   Compute the non-zero pattern for C = A * B
 */
@@ -525,10 +532,12 @@ BSRMat<T, M, P>* BSRMatMatMultSymbolic(BSRMat<T, M, N>& A, BSRMat<T, N, P>& B,
 
   return bsr;
 }
+#endif
 
 /*
   Compute the non-zero pattern for C = S + A * B
 */
+#if 0
 template <typename T, index_t M, index_t N, index_t P>
 BSRMat<T, M, P>* BSRMatMatMultAddSymbolic(BSRMat<T, M, P>& S,
                                           BSRMat<T, M, N>& A,
@@ -604,6 +613,7 @@ BSRMat<T, M, P>* BSRMatMatMultAddSymbolic(BSRMat<T, M, P>& S,
 
   return bsr;
 }
+#endif
 
 /*
   Compute the non-zero pattern of the transpose of the matrix
@@ -645,7 +655,8 @@ BSRMat<T, N, M>* BSRMatMakeTransposeSymbolic(BSRMat<T, M, N>& A) {
   rowp[0] = 0;
 
   // Create the new BSR matrix
-  BSRMat<T, N, M>* At = new BSRMat<T, N, M>(nrows, ncols, nnz, rowp, cols);
+  BSRMat<T, N, M>* At =
+      new BSRMat<T, N, M>(nrows, ncols, nnz, rowp.data(), cols.data());
 
   return At;
 }
@@ -693,6 +704,7 @@ BSRMat<T, M, N>* BSRMatDuplicate(BSRMat<T, M, N>& A) {
 /*
   Multicolor code for a single process using a greedy algorithm
 */
+#if 0
 template <class VecType>
 index_t CSRMultiColorOrder(const index_t nvars, const index_t rowp[],
                            const index_t cols[], VecType colors, VecType perm) {
@@ -772,6 +784,7 @@ void BSRMatMultiColorOrder(BSRMat<T, M, M>& A) {
     A.color_count[colors[i]]++;
   }
 }
+#endif
 
 }  // namespace SparseUtils
 
