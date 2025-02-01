@@ -448,6 +448,112 @@ BSRMat<T, M, M>* BSRMatAMDFactorSymbolic(BSRMat<T, M, M>& A,
 }
 #endif
 
+template <typename T, index_t M>
+BSRMat<T, M, M>* BSRMatAMDFactorSymbolicCUDA(BSRMat<T, M, M>& A,
+                                             double fill_factor = 5.0) {
+  // modified version for CUDA
+  // Copy over the non-zero structure of the matrix
+  int nrows = A.nbrows;
+  // IdxArray1D_t rowp("rowp", A.nbrows + 1);
+  // IdxArray1D_t cols("cols", A.nnz);
+  // IdxArray1D_t perm_("perm_", A.nbrows);
+
+  std::vector<index_t> rowp(A.nbrows + 1);
+  std::vector<index_t> cols(A.nnz);
+  std::vector<index_t> perm_(A.nbrows);
+
+  // Copy the values to rowp and cols
+  // BLAS::copy(rowp, A.rowp);
+  // BLAS::copy(cols, A.cols);
+  rowp.assign(A.rowp, A.rowp + A.nbrows + 1);
+  cols.assign(A.cols, A.cols + A.nnz);
+
+  // return;
+
+  // Compute the re-ordering
+  int* interface_nodes = NULL;
+  int ninterface_nodes = 0;
+  int ndep_vars = 0;
+  int* dep_vars = NULL;
+  int* indep_ptr = NULL;
+  int* indep_vars = NULL;
+  int use_exact_degree = 0;
+  amd_order_interface(nrows, (int*)rowp.data(), (int*)cols.data(),
+                      (int*)perm_.data(), interface_nodes, ninterface_nodes,
+                      ndep_vars, dep_vars, indep_ptr, indep_vars,
+                      use_exact_degree);
+
+  // Set up the factorization
+  // perm[new var] = old_var
+  // iperm[old var] = new var
+
+  // Set the permutation array
+  std::vector<index_t> perm(A.nbrows);
+  std::vector<index_t> iperm(A.nbrows);
+  // IdxArray1D_t perm("perm", A.nbrows);
+  // IdxArray1D_t iperm("iperm", A.nbrows);
+  // BLAS::copy(perm, perm_);
+  // std::copy(perm, perm_, A.nbrows);
+  perm.assign(perm_.data(), perm_.data() + A.nbrows);
+
+  for (index_t i = 0; i < A.nbrows; i++) {
+    iperm[perm[i]] = i;
+  }
+
+  // Allocate the new arrays for re-ordering the vector
+  // IdxArray1D_t Arowp("Arowp", A.nbrows + 1);
+  // IdxArray1D_t Acols("Acols", A.nnz);
+  std::vector<index_t> Arowp(A.nbrows + 1);
+  std::vector<index_t> Acols(A.nnz);
+
+  // Re-order the matrix
+  Arowp[0] = 0;
+  index_t nnz = 0;
+  for (index_t i = 0; i < A.nbrows;
+       i++) {  // Loop over the new rows of the matrix
+    index_t iold = perm[i];
+
+    // Find the old column numbres and convert them to new ones
+    for (index_t jp = A.rowp[iold]; jp < A.rowp[iold + 1]; jp++, nnz++) {
+      Acols[nnz] = iperm[A.cols[jp]];
+    }
+
+    // After copying, update the size
+    Arowp[i + 1] = Arowp[i] + (A.rowp[iold + 1] - A.rowp[iold]);
+  }
+
+  // Sort the data for the permuted matrix
+  SortCSRData(A.nbrows, Arowp, Acols);
+
+  // Compute the symbolic matrix
+  std::vector<index_t> Afrowp(A.nbrows + 1);
+  std::vector<index_t> Afcols(index_t(fill_factor * nnz));
+
+  index_t Afnnz = CSRFactorSymbolic(A.nbrows, Arowp, Acols, Afrowp, Afcols);
+
+  // deep copy rowp, cols, perm, iperm (otherwise std::vector go out of scope
+  // and data)
+  index_t *new_rowp, *new_cols, *new_perm, *new_iperm;
+  // new_rowp = new index_t[A.nbrows + 1];
+  // std::copy(Afrowp.begin(), Afrowp.end(), new_rowp);
+  // new_cols = new index_t[Afnnz];
+  // std::copy(Afcols.begin(), Afcols.end(), new_cols);
+  new_perm = new index_t[A.nbrows];
+  std::copy(perm.begin(), perm.end(), new_perm);
+  new_iperm = new index_t[A.nbrows];
+  std::copy(iperm.begin(), iperm.end(), new_iperm);
+
+  BSRMat<T, M, M>* Afactor = new BSRMat<T, M, M>(A.nbrows, A.nbrows, Afnnz,
+                                                 Afrowp.data(), Afcols.data());
+
+  // Set up the non-zero pattern for the new matrix
+  // deep copy
+  Afactor->perm = new_perm;
+  Afactor->iperm = new_iperm;
+
+  return Afactor;
+}
+
 /*
   Symbolic factorization stage
 */
