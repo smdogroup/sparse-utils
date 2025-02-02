@@ -368,9 +368,12 @@ index_t CSRFactorSymbolic(const index_t nrows, const VecType Arowp,
   Find the reordering to reduce the fill in during factorization
 */
 // need to add this back for re-ordering version and fix a2d-multiphysics code
+// Sean : see BSRMatAMDFactorSymbolicCUDA below for corrections there are
+// several mistakes in this code and it reorders the matrix wrong
+
 #if 0
-template <typename T, index_t M>
-BSRMat<T, M, M>* BSRMatAMDFactorSymbolic(BSRMat<T, M, M>& A,
+template <typename T, index_t M> BSRMat<T, M, M>*
+BSRMatAMDFactorSymbolic(BSRMat<T, M, M>& A,
                                          double fill_factor = 5.0) {
   // Copy over the non-zero structure of the matrix
   int nrows = A.nbrows;
@@ -509,6 +512,23 @@ BSRMat<T, M, M>* BSRMatAMDFactorSymbolicCUDA(BSRMat<T, M, M>& A,
   // Re-order the matrix
   Arowp[0] = 0;
   index_t nnz = 0;
+  // // Sean - had at one point switched to perm on cols and rows (opposite of
+  // convention here)
+  // // leads to higher fillin (so switched back below)
+  // for (index_t inew = 0; inew < A.nbrows;
+  //      inew++) {  // Loop over the new rows of the matrix
+  //   index_t iold = iperm[inew];
+
+  //   // Find the old column numbres and convert them to new ones
+  //   for (index_t jp = A.rowp[iold]; jp < A.rowp[iold + 1]; jp++, nnz++) {
+  //     Acols[nnz] = perm[A.cols[jp]];
+  //   }
+
+  //   // After copying, update the size
+  //   Arowp[inew + 1] = Arowp[inew] + (A.rowp[iold + 1] - A.rowp[iold]);
+  // }
+
+  // iperm is used to reorder matrix here essentially
   for (index_t i = 0; i < A.nbrows;
        i++) {  // Loop over the new rows of the matrix
     index_t iold = perm[i];
