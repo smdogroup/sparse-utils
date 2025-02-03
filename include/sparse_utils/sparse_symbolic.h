@@ -217,6 +217,59 @@ BSRMat<T, M, M>* BSRMatFromConnectivity(ConnArray& conn) {
 }
 #endif
 
+/*
+  Compute the non-zero pattern of the matrix based on the connectivity pattern
+*/
+template <typename T, index_t M>
+BSRMat<T, M, M>* BSRMatFromConnectivityCUDA(int nelems, int nnodes, int nodes_per_elem, int32_t* conn) {
+
+  // Insert all the nodes into the node set
+  std::set<std::pair<index_t, index_t>> node_set;
+  for (index_t i = 0; i < nelems; i++) {
+    for (index_t j1 = 0; j1 < nodes_per_elem; j1++) {
+      for (index_t j2 = 0; j2 < nodes_per_elem; j2++) {
+        node_set.insert(std::pair<index_t, index_t>(conn[nodes_per_elem*i + j1], conn[nodes_per_elem*i + j2]));
+      }
+    }
+  }
+
+  // Find the number of nodes referenced by other nodes
+  std::vector<index_t> rowp(nnodes + 1);
+
+  typename std::set<std::pair<index_t, index_t>>::iterator it;
+  for (it = node_set.begin(); it != node_set.end(); it++) {
+    rowp[it->first + 1] += 1;
+  }
+
+  // Set the pointer into the rows
+  rowp[0] = 0;
+  for (index_t i = 0; i < nnodes; i++) {
+    rowp[i + 1] += rowp[i];
+  }
+
+  index_t nnz = rowp[nnodes];
+  std::vector<index_t> cols(nnz);
+
+  for (it = node_set.begin(); it != node_set.end(); it++) {
+    cols[rowp[it->first]] = it->second;
+    rowp[it->first]++;
+  }
+
+  // Reset the pointer into the nodes
+  for (index_t i = nnodes; i > 0; i--) {
+    rowp[i] = rowp[i - 1];
+  }
+  rowp[0] = 0;
+
+  // Sort the cols array
+  SortCSRData(nnodes, rowp, cols);
+
+  BSRMat<T, M, M>* A =
+      new BSRMat<T, M, M>(nnodes, nnodes, nnz, rowp.data(), cols.data());
+
+  return A;
+}
+
 #if 0
 template <typename T, index_t M, class ConnArray>
 BSRMat<T, M, M>* BSRMatFromConnectivityDeprecated(ConnArray& conn) {
