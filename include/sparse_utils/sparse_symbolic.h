@@ -221,7 +221,7 @@ BSRMat<T, M, M>* BSRMatFromConnectivity(ConnArray& conn) {
   Compute the non-zero pattern of the matrix based on the connectivity pattern
 */
 template <typename T, index_t M>
-BSRMat<T, M, M>* BSRMatFromConnectivityCUDA(int nelems, int nnodes, int nodes_per_elem, int32_t* conn) {
+BSRMat<T, M, M>* BSRMatFromConnectivityCUDA(int nelems, int nnodes, int nodes_per_elem, const int32_t* conn) {
 
   // Insert all the nodes into the node set
   std::set<std::pair<index_t, index_t>> node_set;
