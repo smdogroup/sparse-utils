@@ -82,9 +82,9 @@ inline void BLASgemm(const enum CBLAS_ORDER Order,
 }
 
 // Matrix norm
-double LAPACKlange(char norm, int m, int n, const double *a, int lda) {
-  return LAPACKE_dlange(LAPACK_COL_MAJOR, norm, m, n, a, lda);
-}
+// double LAPACKlange(char norm, int m, int n, const double *a, int lda) {
+//   return LAPACKE_dlange(LAPACK_COL_MAJOR, norm, m, n, a, lda);
+// }
 
 // General factorization routines
 inline void LAPACKgetrf(int m, int n, double *a, int lda, int *ipiv,

@@ -630,7 +630,10 @@ BSRMat<T, M, M>* BSRMatAMDFactorSymbolicCUDA(BSRMat<T, M, M>& A,
 }
 
 template <typename T, int M>
-BSRMat<T, M, M>* BSRMatApplyPerm(BSRMat<T, M, M>& A) {
+BSRMat<T, M, M>* BSRMatApplyPerm(BSRMat<T, M, M>& A, int* perm, int* iperm) {
+  // accept perm, iperm from separate input so not destroyed when matrix is
+  // deleted
+
   std::vector<index_t> Arowp(A.nbrows + 1);
   std::vector<index_t> Acols(A.nnz);
 
@@ -641,11 +644,11 @@ BSRMat<T, M, M>* BSRMatApplyPerm(BSRMat<T, M, M>& A) {
   // iperm is used to reorder matrix here essentially
   for (index_t i = 0; i < A.nbrows;
        i++) {  // Loop over the new rows of the matrix
-    index_t iold = A.perm[i];
+    index_t iold = perm[i];
 
     // Find the old column numbres and convert them to new ones
     for (index_t jp = A.rowp[iold]; jp < A.rowp[iold + 1]; jp++, nnz++) {
-      Acols[nnz] = A.iperm[A.cols[jp]];
+      Acols[nnz] = iperm[A.cols[jp]];
     }
 
     // After copying, update the size
@@ -655,9 +658,12 @@ BSRMat<T, M, M>* BSRMatApplyPerm(BSRMat<T, M, M>& A) {
   // Sort the data for the permuted matrix
   SortCSRData(A.nbrows, Arowp, Acols);
 
+  printf("Method 1 rowp: ");
+  printVec<int>(A.nbrows + 1, Arowp.data());
+
   //
   BSRMat<T, M, M>* Afactor = new BSRMat<T, M, M>(A.nbrows, A.nbrows, A.nnz,
-                                                 Afrowp.data(), Afcols.data());
+                                                 Arowp.data(), Acols.data());
   return Afactor;
 }
 
@@ -672,10 +678,32 @@ BSRMat<T, M, M>* BSRMatFactorSymbolic(BSRMat<T, M, M>& A,
 
   index_t nnz = CSRFactorSymbolic(A.nbrows, A.rowp, A.cols, rowp, cols);
 
-  BSRMat<T, M, M>* Afactor =
-      new BSRMat<T, M, M>(A.nbrows, A.nbrows, nnz, rowp, cols);
+  printf("Method 2 rowp: ");
+  printVec<int>(A.nbrows + 1, rowp.data());
+
+  BSRMat<T, M, M>* Afactor = new BSRMat<T, M, M>(
+      A.nbrows, A.nbrows, nnz, rowp.data(), cols.data(), nullptr);
 
   return Afactor;
+}
+
+template <typename T, int M>
+BSRMat<T, M, M>* BSRMatReorderFactorSymbolic(BSRMat<T, M, M>& A, int* perm,
+                                             double fill) {
+  // deep copy perm so it doesn't get modified or deleted later
+  int* _perm = new int[A.nbrows];
+  int* iperm = new int[A.nbrows];
+  for (int inode = 0; inode < A.nbrows; inode++) {
+    _perm[inode] = perm[inode];
+    iperm[perm[inode]] = inode;
+  }
+
+  // don't want to put these in the matrix, will get deleted later
+  // A.perm = _perm;
+  // A.iperm = iperm;
+
+  auto A2 = BSRMatApplyPerm<T, M>(A, perm, iperm);
+  return BSRMatFactorSymbolic<T, M>(*A2, fill);
 }
 
 #if 0
