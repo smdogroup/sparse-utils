@@ -221,14 +221,16 @@ BSRMat<T, M, M>* BSRMatFromConnectivity(ConnArray& conn) {
   Compute the non-zero pattern of the matrix based on the connectivity pattern
 */
 template <typename T, index_t M>
-BSRMat<T, M, M>* BSRMatFromConnectivityCUDA(int nelems, int nnodes, int nodes_per_elem, const int32_t* conn) {
-
+BSRMat<T, M, M>* BSRMatFromConnectivityCUDA(int nelems, int nnodes,
+                                            int nodes_per_elem,
+                                            const int32_t* conn) {
   // Insert all the nodes into the node set
   std::set<std::pair<index_t, index_t>> node_set;
   for (index_t i = 0; i < nelems; i++) {
     for (index_t j1 = 0; j1 < nodes_per_elem; j1++) {
       for (index_t j2 = 0; j2 < nodes_per_elem; j2++) {
-        node_set.insert(std::pair<index_t, index_t>(conn[nodes_per_elem*i + j1], conn[nodes_per_elem*i + j2]));
+        node_set.insert(std::pair<index_t, index_t>(
+            conn[nodes_per_elem * i + j1], conn[nodes_per_elem * i + j2]));
       }
     }
   }
@@ -627,10 +629,42 @@ BSRMat<T, M, M>* BSRMatAMDFactorSymbolicCUDA(BSRMat<T, M, M>& A,
   return Afactor;
 }
 
+template <typename T, int M>
+BSRMat<T, M, M>* BSRMatApplyPerm(BSRMat<T, M, M>& A) {
+  std::vector<index_t> Arowp(A.nbrows + 1);
+  std::vector<index_t> Acols(A.nnz);
+
+  // Re-order the matrix
+  Arowp[0] = 0;
+  index_t nnz = 0;
+
+  // iperm is used to reorder matrix here essentially
+  for (index_t i = 0; i < A.nbrows;
+       i++) {  // Loop over the new rows of the matrix
+    index_t iold = A.perm[i];
+
+    // Find the old column numbres and convert them to new ones
+    for (index_t jp = A.rowp[iold]; jp < A.rowp[iold + 1]; jp++, nnz++) {
+      Acols[nnz] = A.iperm[A.cols[jp]];
+    }
+
+    // After copying, update the size
+    Arowp[i + 1] = Arowp[i] + (A.rowp[iold + 1] - A.rowp[iold]);
+  }
+
+  // Sort the data for the permuted matrix
+  SortCSRData(A.nbrows, Arowp, Acols);
+
+  //
+  BSRMat<T, M, M>* Afactor = new BSRMat<T, M, M>(A.nbrows, A.nbrows, A.nnz,
+                                                 Afrowp.data(), Afcols.data());
+  return Afactor;
+}
+
 /*
   Symbolic factorization stage
 */
-template <typename T, index_t M>
+template <typename T, int M>
 BSRMat<T, M, M>* BSRMatFactorSymbolic(BSRMat<T, M, M>& A,
                                       double fill_factor = 5.0) {
   std::vector<index_t> rowp(A.nbrows + 1);
