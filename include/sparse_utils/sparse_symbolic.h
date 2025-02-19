@@ -658,8 +658,8 @@ BSRMat<T, M, M>* BSRMatApplyPerm(BSRMat<T, M, M>& A, int* perm, int* iperm) {
   // Sort the data for the permuted matrix
   SortCSRData(A.nbrows, Arowp, Acols);
 
-  printf("Method 1 rowp: ");
-  printVec<int>(A.nbrows + 1, Arowp.data());
+  // printf("Method 1 rowp: ");
+  // printVec<int>(A.nbrows + 1, Arowp.data());
 
   //
   BSRMat<T, M, M>* Afactor = new BSRMat<T, M, M>(A.nbrows, A.nbrows, A.nnz,
@@ -678,8 +678,8 @@ BSRMat<T, M, M>* BSRMatFactorSymbolic(BSRMat<T, M, M>& A,
 
   index_t nnz = CSRFactorSymbolic(A.nbrows, A.rowp, A.cols, rowp, cols);
 
-  printf("Method 2 rowp: ");
-  printVec<int>(A.nbrows + 1, rowp.data());
+  // printf("Method 2 rowp: ");
+  // printVec<int>(A.nbrows + 1, rowp.data());
 
   BSRMat<T, M, M>* Afactor = new BSRMat<T, M, M>(
       A.nbrows, A.nbrows, nnz, rowp.data(), cols.data(), nullptr);
