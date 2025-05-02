@@ -363,10 +363,13 @@ index_t CSRFactorSymbolic(const index_t nrows, const VecType Arowp,
 
   // Row, column and diagonal index data for the new factored matrix
   std::vector<index_t> diag(nrows);
+  // printf("begin CSRFactorSymbolic\n");
 
   rowp[0] = 0;
   for (index_t i = 0; i < nrows; i++) {
     index_t nr = 0;  // Number of entries in the current row
+
+    // printf("i %d\n", i);
 
     // Add the matrix elements to the current row of the matrix.
     // These new elements are sorted.
@@ -415,6 +418,8 @@ index_t CSRFactorSymbolic(const index_t nrows, const VecType Arowp,
     rowp[i + 1] = nnz;
     diag[i] = rowp[i] + j;
   }
+
+  // printf("finish CSRFactorSymbolic\n");
 
   return nnz;
 }
@@ -608,7 +613,8 @@ BSRMat<T, M, M>* BSRMatAMDFactorSymbolicCUDA(BSRMat<T, M, M>& A,
 
   // deep copy rowp, cols, perm, iperm (otherwise std::vector go out of scope
   // and data)
-  index_t *new_rowp, *new_cols, *new_perm, *new_iperm;
+  // index_t *new_rowp, *new_cols
+  index_t *new_perm, *new_iperm;
   // new_rowp = new index_t[A.nbrows + 1];
   // std::copy(Afrowp.begin(), Afrowp.end(), new_rowp);
   // new_cols = new index_t[Afnnz];
@@ -625,6 +631,64 @@ BSRMat<T, M, M>* BSRMatAMDFactorSymbolicCUDA(BSRMat<T, M, M>& A,
   // deep copy
   Afactor->perm = new_perm;
   Afactor->iperm = new_iperm;
+
+  return Afactor;
+}
+
+
+template <typename T, index_t M>
+BSRMat<T, M, M>* BSRMatReorderSymbolicCUDA(BSRMat<T, M, M>& A,
+                                             double fill_factor = 5.0) {
+  // modified version for CUDA
+  // Copy over the non-zero structure of the matrix
+  int nrows = A.nbrows;
+
+  std::vector<index_t> rowp(A.nbrows + 1);
+  std::vector<index_t> cols(A.nnz);
+
+  // Copy the values to rowp and cols
+  rowp.assign(A.rowp, A.rowp + A.nbrows + 1);
+  cols.assign(A.cols, A.cols + A.nnz);
+
+  // Set the permutation array
+  std::vector<index_t> perm(A.nbrows);
+  std::vector<index_t> iperm(A.nbrows);
+  perm.assign(A.perm, A.perm + A.nbrows);
+  iperm.assign(A.iperm, A.iperm + A.nbrows);
+
+  // Allocate the new arrays for re-ordering the vector
+  std::vector<index_t> Arowp(A.nbrows + 1);
+  std::vector<index_t> Acols(A.nnz);
+
+  // Re-order the matrix
+  Arowp[0] = 0;
+  index_t nnz = 0;
+
+  // iperm is used to reorder matrix here essentially
+  for (index_t i = 0; i < A.nbrows;
+       i++) {  // Loop over the new rows of the matrix
+    index_t iold = perm[i];
+
+    // Find the old column numbres and convert them to new ones
+    for (index_t jp = A.rowp[iold]; jp < A.rowp[iold + 1]; jp++, nnz++) {
+      Acols[nnz] = iperm[A.cols[jp]];
+    }
+
+    // After copying, update the size
+    Arowp[i + 1] = Arowp[i] + (A.rowp[iold + 1] - A.rowp[iold]);
+  }
+
+  // Sort the data for the permuted matrix
+  SortCSRData(A.nbrows, Arowp, Acols);
+
+  // Compute the symbolic matrix
+  std::vector<index_t> Afrowp(A.nbrows + 1);
+  std::vector<index_t> Afcols(index_t(fill_factor * nnz));
+
+  index_t Afnnz = CSRFactorSymbolic(A.nbrows, Arowp, Acols, Afrowp, Afcols);
+
+  BSRMat<T, M, M>* Afactor = new BSRMat<T, M, M>(A.nbrows, A.nbrows, Afnnz,
+                                                 Afrowp.data(), Afcols.data());
 
   return Afactor;
 }
@@ -690,6 +754,8 @@ BSRMat<T, M, M>* BSRMatFactorSymbolic(BSRMat<T, M, M>& A,
 template <typename T, int M>
 BSRMat<T, M, M>* BSRMatReorderFactorSymbolic(BSRMat<T, M, M>& A, int* perm,
                                              double fill) {
+
+  // printf("in BSRMatReorderFactorSymbolic:");
   // deep copy perm so it doesn't get modified or deleted later
   int* _perm = new int[A.nbrows];
   int* iperm = new int[A.nbrows];
@@ -697,12 +763,14 @@ BSRMat<T, M, M>* BSRMatReorderFactorSymbolic(BSRMat<T, M, M>& A, int* perm,
     _perm[inode] = perm[inode];
     iperm[perm[inode]] = inode;
   }
+  // printf("checkpt1\n");
 
   // don't want to put these in the matrix, will get deleted later
   // A.perm = _perm;
   // A.iperm = iperm;
 
   auto A2 = BSRMatApplyPerm<T, M>(A, perm, iperm);
+  // printf("checkpt2\n");
   return BSRMatFactorSymbolic<T, M>(*A2, fill);
 }
 
