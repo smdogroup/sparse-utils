@@ -635,10 +635,9 @@ BSRMat<T, M, M>* BSRMatAMDFactorSymbolicCUDA(BSRMat<T, M, M>& A,
   return Afactor;
 }
 
-
 template <typename T, index_t M>
 BSRMat<T, M, M>* BSRMatReorderSymbolicCUDA(BSRMat<T, M, M>& A,
-                                             double fill_factor = 5.0) {
+                                           double fill_factor = 5.0) {
   // modified version for CUDA
   // Copy over the non-zero structure of the matrix
   int nrows = A.nbrows;
@@ -754,7 +753,6 @@ BSRMat<T, M, M>* BSRMatFactorSymbolic(BSRMat<T, M, M>& A,
 template <typename T, int M>
 BSRMat<T, M, M>* BSRMatReorderFactorSymbolic(BSRMat<T, M, M>& A, int* perm,
                                              double fill) {
-
   // printf("in BSRMatReorderFactorSymbolic:");
   // deep copy perm so it doesn't get modified or deleted later
   int* _perm = new int[A.nbrows];
